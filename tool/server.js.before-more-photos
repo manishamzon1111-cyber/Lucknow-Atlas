@@ -915,14 +915,7 @@ async function editableSites() {
   );
 }
 
-async function saveSite({
-  originalId,
-  draft,
-  images = [],
-  newImages = [],
-  coverRef,
-  markerRef,
-}) {
+async function saveSite({ originalId, draft, images = [], cover, markerImage }) {
   const sites = JSON.parse(await fs.readFile(DATA, "utf8"));
   const index = sites.findIndex((site) => site.id === clean(originalId));
   if (index < 0) throw new Error("Place no longer exists; reload the list");
@@ -932,63 +925,8 @@ async function saveSite({
   if (!kept.length) throw new Error("Keep at least one photo");
   if (kept.some((item) => !allowed.has(item)))
     throw new Error("Unknown photo path in edit request");
-  if (!Array.isArray(newImages) || kept.length + newImages.length > 8)
-    throw new Error("A place can have at most 8 photos");
-  const folder = path.dirname(kept[0] || sites[index].images?.[0] || "").replace(/^img\//, "");
-  if (!folder || folder.includes("..") || folder.includes("/"))
-    throw new Error("Could not determine this place's image folder");
-  const stage = path.join(HERE, `.stage-${crypto.randomUUID()}`);
-  const finalDir = path.join(IMG, folder);
-  const added = [];
-  await fs.mkdir(stage, { recursive: true });
-  try {
-    const usedNumbers = new Set(
-      (await fs.readdir(finalDir).catch(() => [])).map((file) => Number.parseInt(file, 10)).filter(Number.isFinite),
-    );
-    let number = 1;
-    for (let i = 0; i < newImages.length; i++) {
-      while (usedNumbers.has(number)) number++;
-      const filename = `${number++}.jpg`;
-      await downloadImage(newImages[i], path.join(stage, filename));
-      added.push({ filename, path: `img/${folder}/${filename}` });
-    }
-    const existingHashes = new Set();
-    for (const site of sites)
-      for (const relative of site.images || []) {
-        const hash = await fs.readFile(path.join(ROOT, relative)).then(
-          (data) => crypto.createHash("sha256").update(data).digest("hex"),
-          () => "",
-        );
-        if (hash) existingHashes.add(hash);
-      }
-    const newHashes = new Set();
-    for (const item of added) {
-      const hash = crypto.createHash("sha256").update(await fs.readFile(path.join(stage, item.filename))).digest("hex");
-      if (existingHashes.has(hash) || newHashes.has(hash))
-        throw new Error("A selected photo is already in the Atlas");
-      newHashes.add(hash);
-    }
-    await fs.mkdir(finalDir, { recursive: true });
-    for (const item of added)
-      await fs.rename(path.join(stage, item.filename), path.join(finalDir, item.filename));
-  } catch (error) {
-    await fs.rm(stage, { recursive: true, force: true });
-    for (const item of added) await fs.rm(path.join(finalDir, item.filename), { force: true });
-    throw error;
-  }
-  const finalImages = [...kept, ...added.map((item) => item.path)];
-  const resolveRef = (ref) => {
-    const value = clean(ref);
-    if (value.startsWith("old:")) return value.slice(4);
-    if (value.startsWith("new:")) return added[Number(value.slice(4))]?.path;
-    return "";
-  };
-  const cover = resolveRef(coverRef);
-  const markerImage = resolveRef(markerRef);
-  if (!finalImages.includes(cover) || !finalImages.includes(markerImage)) {
-    for (const item of added) await fs.rm(path.join(finalDir, item.filename), { force: true });
-    throw new Error("Choose a gallery cover and map pin from the photos being saved");
-  }
+  if (!kept.includes(cover) || !kept.includes(markerImage))
+    throw new Error("Cover and map pin must be selected from the kept photos");
   const entry = {
     ...sites[index],
     id: clean(draft.id),
@@ -1000,7 +938,7 @@ async function saveSite({
     lng: Number(draft.lng),
     wiki: clean(draft.wiki),
     summary: clean(draft.summary),
-    images: finalImages,
+    images: kept,
     cover,
     markerImage,
     mapsQuery: clean(draft.mapsQuery),
@@ -1015,16 +953,8 @@ async function saveSite({
   next[index] = entry;
   const temp = `${DATA}.${crypto.randomUUID()}.tmp`;
   await fs.writeFile(temp, `${JSON.stringify(next, null, 2)}\n`, { flag: "wx" });
-  try {
-    JSON.parse(await fs.readFile(temp, "utf8"));
-    await fs.rename(temp, DATA);
-  } catch (error) {
-    await fs.rm(temp, { force: true });
-    for (const item of added) await fs.rm(path.join(finalDir, item.filename), { force: true });
-    throw error;
-  } finally {
-    await fs.rm(stage, { recursive: true, force: true });
-  }
+  JSON.parse(await fs.readFile(temp, "utf8"));
+  await fs.rename(temp, DATA);
   const removed = [...allowed].filter((item) => !kept.includes(item));
   const usedElsewhere = new Set(
     sites.flatMap((site, siteIndex) =>

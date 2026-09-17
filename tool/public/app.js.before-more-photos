@@ -3,7 +3,6 @@ let result = null;
 let activeIssue = null;
 let allSites = [];
 let editingSite = null;
-let editCandidates = [];
 
 const fields = [
   ["name", "Name", "wide"],
@@ -325,10 +324,10 @@ async function loadSites() {
   siteOptions();
 }
 function renderEditPhotos() {
-  $("#editPhotos").innerHTML = editingSite.imageDetails.map((image, index) => `<article class="photo edit-photo" data-index="${index}"><img src="/${escapeHtml(image.path)}" alt=""><div class="photo-body"><div class="photo-meta">${image.width}×${image.height}${image.missing ? " · missing" : ""}</div><div class="move-buttons"><button type="button" class="secondary" data-move="up">↑</button><button type="button" class="secondary" data-move="down">↓</button></div><div class="image-roles"><label><input type="radio" name="editCover" value="old:${escapeHtml(image.path)}" ${editingSite.cover === image.path ? "checked" : ""}> Gallery cover</label><label><input type="radio" name="editMarker" value="old:${escapeHtml(image.path)}" ${(editingSite.markerImage || editingSite.cover) === image.path ? "checked" : ""}> Map pin</label></div><label class="remove-photo"><input type="checkbox"> Remove</label></div></article>`).join("");
+  $("#editPhotos").innerHTML = editingSite.imageDetails.map((image, index) => `<article class="photo edit-photo" data-index="${index}"><img src="/${escapeHtml(image.path)}" alt=""><div class="photo-body"><div class="photo-meta">${image.width}×${image.height}${image.missing ? " · missing" : ""}</div><div class="move-buttons"><button type="button" class="secondary" data-move="up">↑</button><button type="button" class="secondary" data-move="down">↓</button></div><div class="image-roles"><label><input type="radio" name="editCover" value="${escapeHtml(image.path)}" ${editingSite.cover === image.path ? "checked" : ""}> Gallery cover</label><label><input type="radio" name="editMarker" value="${escapeHtml(image.path)}" ${(editingSite.markerImage || editingSite.cover) === image.path ? "checked" : ""}> Map pin</label></div><label class="remove-photo"><input type="checkbox"> Remove</label></div></article>`).join("");
   $("#editPhotos").querySelectorAll("[data-move]").forEach((button) => button.onclick = () => {
-    editingSite.cover = $("#editPhotos input[name=editCover]:checked")?.value?.replace(/^old:/, "") || editingSite.cover;
-    editingSite.markerImage = $("#editPhotos input[name=editMarker]:checked")?.value?.replace(/^old:/, "") || editingSite.markerImage;
+    editingSite.cover = $("#editPhotos input[name=editCover]:checked")?.value || editingSite.cover;
+    editingSite.markerImage = $("#editPhotos input[name=editMarker]:checked")?.value || editingSite.markerImage;
     const from = Number(button.closest(".edit-photo").dataset.index);
     const to = button.dataset.move === "up" ? from - 1 : from + 1;
     if (to < 0 || to >= editingSite.imageDetails.length) return;
@@ -336,37 +335,11 @@ function renderEditPhotos() {
     renderEditPhotos();
   });
 }
-function ensureMorePhotoUI() {
-  if ($("#findMorePhotos")) return;
-  $("#editPhotos").insertAdjacentHTML("afterend", `<div class="subhead"><div><h3>Add more photos</h3><p>Searches and validates images at least 1200×700.</p></div><button id="findMorePhotos" type="button" class="secondary">Find more photos</button></div><div id="editCandidates" class="photos"></div>`);
-  $("#findMorePhotos").onclick = findMorePhotos;
-}
-function renderEditCandidates() {
-  $("#editCandidates").innerHTML = editCandidates.map((image, index) => `<article class="photo new-photo"><img src="${escapeHtml(image.url)}" alt="" loading="lazy" referrerpolicy="no-referrer"><div class="photo-body"><div class="photo-title">${escapeHtml(image.title || "Photo candidate")}</div><div class="photo-meta">${escapeHtml(image.source || "Source")} · ${image.width}×${image.height}</div><label><input type="checkbox" data-new="${index}"> Add photo</label><div class="image-roles"><label><input type="radio" name="editCover" value="new:${index}"> Gallery cover</label><label><input type="radio" name="editMarker" value="new:${index}"> Map pin</label></div></div></article>`).join("");
-  $("#editCandidates").querySelectorAll("input[type=radio]").forEach((radio) => radio.onchange = () => {
-    radio.closest(".new-photo").querySelector("input[type=checkbox]").checked = true;
-  });
-}
-async function findMorePhotos() {
-  const button = $("#findMorePhotos");
-  button.disabled = true;
-  button.textContent = "Searching…";
-  try {
-    const data = await api("/api/research", { method: "POST", body: JSON.stringify({ name: editingSite.name, category: editingSite.category, location: editingSite.mapsQuery }) });
-    editCandidates = data.images || [];
-    renderEditCandidates();
-    if (!editCandidates.length) toast("No additional verified images were found.", true);
-  } catch (error) { toast(error.message, true); }
-  finally { button.disabled = false; button.textContent = "Find more photos"; }
-}
 function openEditor() {
   editingSite = structuredClone(allSites.find((site) => site.id === $("#siteSelect").value));
   if (!editingSite) return;
   renderDraftInto($("#editForm"), editingSite);
   renderEditPhotos();
-  editCandidates = [];
-  ensureMorePhotoUI();
-  $("#editCandidates").innerHTML = "";
   $("#siteEditor").classList.remove("hidden");
 }
 function renderDraftInto(element, draft) {
@@ -379,14 +352,11 @@ $("#reloadSites").onclick = () => loadSites().catch((e) => toast(e.message, true
 $("#saveSite").onclick = async () => {
   const cards = [...$("#editPhotos").querySelectorAll(".edit-photo")];
   const kept = cards.filter((card) => !card.querySelector('.remove-photo input').checked).map((card) => editingSite.imageDetails[Number(card.dataset.index)].path);
-  const selectedNew = [...$("#editCandidates").querySelectorAll("input[data-new]:checked")].map((input) => ({ original: Number(input.dataset.new), image: editCandidates[Number(input.dataset.new)] }));
-  if (kept.length + selectedNew.length > 8) return toast("A place can have at most 8 photos.", true);
-  const remap = (value) => value?.startsWith("new:") ? `new:${selectedNew.findIndex((item) => item.original === Number(value.slice(4)))}` : value;
-  const coverRef = remap(document.querySelector('input[name="editCover"]:checked')?.value);
-  const markerRef = remap(document.querySelector('input[name="editMarker"]:checked')?.value);
-  if (coverRef === "new:-1" || markerRef === "new:-1") return toast("Select any new photo chosen as cover or map pin.", true);
+  const cover = $("#editPhotos input[name=editCover]:checked")?.value;
+  const markerImage = $("#editPhotos input[name=editMarker]:checked")?.value;
+  if (!kept.includes(cover) || !kept.includes(markerImage)) return toast("Choose cover and map pin from photos you are keeping.", true);
   try {
-    const saved = await api("/api/site/save", { method: "POST", body: JSON.stringify({ originalId: editingSite.id, draft: Object.fromEntries(new FormData($("#editForm"))), images: kept, newImages: selectedNew.map((item) => item.image), coverRef, markerRef }) });
+    const saved = await api("/api/site/save", { method: "POST", body: JSON.stringify({ originalId: editingSite.id, draft: Object.fromEntries(new FormData($("#editForm"))), images: kept, cover, markerImage }) });
     toast(`${saved.entry.name} updated. Backup: ${saved.backup}`); $("#siteEditor").classList.add("hidden"); await Promise.all([loadSites(), loadStatus()]);
   } catch (error) { toast(error.message, true); }
 };

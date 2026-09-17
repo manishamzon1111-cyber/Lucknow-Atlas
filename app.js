@@ -10,6 +10,40 @@ const PERIOD_COLORS = {
   "Living":"#5c7a3f"
 };
 
+// Inline outline SVGs for the category filter chips.
+// viewBox 0 0 24 24, currentColor stroke, stroke-width 1.8 throughout so
+// every icon reads at a consistent weight at ~20px.
+const CATEGORY_ICONS = {
+  heritage: `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16"/><path d="M7 20V11"/><path d="M17 20V11"/><path d="M7 11a5 5 0 0 1 10 0"/></svg>`,
+  religious: `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16"/><path d="M7 20v-7h10v7"/><path d="M10.3 20v-3.4h3.4V20"/><path d="M7 13 12 5l5 8"/><circle cx="12" cy="3.3" r=".8"/></svg>`,
+  architecture: `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="16" rx="1"/><path d="M9 8h.01"/><path d="M9 12h.01"/><path d="M9 16h.01"/><path d="M15 8h.01"/><path d="M15 12h.01"/><path d="M15 16h.01"/></svg>`,
+  parks: `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21C6.5 15.5 6.5 8.5 12 3c5.5 5.5 5.5 12.5 0 18Z"/><path d="M12 21V7"/></svg>`,
+  markets: `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9 5 4h14l1 5"/><path d="M4 9a2 2 0 0 0 4 0 2 2 0 0 0 4 0 2 2 0 0 0 4 0 2 2 0 0 0 4 0"/><path d="M5 9.5V20h14V9.5"/><path d="M10 20v-5h4v5"/></svg>`,
+  museums: `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10 12 4l9 6"/><path d="M4 10h16"/><path d="M6 10v8"/><path d="M10 10v8"/><path d="M14 10v8"/><path d="M18 10v8"/><path d="M3 20h18"/></svg>`,
+  family: `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="2.6"/><path d="M3.5 20c0-3.6 2.5-6 5.5-6s5.5 2.4 5.5 6"/><circle cx="17" cy="8.5" r="2.1"/><path d="M14.8 13.2c2.6.2 4.7 2.4 4.7 5.6"/></svg>`,
+  food: `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3v5"/><path d="M8 3v5"/><path d="M10 3v5"/><path d="M6 8c0 1.4.9 2.5 2 2.5s2-1.1 2-2.5"/><path d="M8 10.5V21"/><path d="M17 3c-1.66 0-3 1.79-3 4s1.34 4 3 4 3-1.79 3-4-1.34-4-3-4Z"/><path d="M17 11v10"/></svg>`,
+  // fallback for any category not in the list above (keeps things from breaking
+  // if sites.json ever introduces a new category)
+  default: `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-7.1 7-12a7 7 0 1 0-14 0c0 4.9 7 12 7 12Z"/><circle cx="12" cy="9" r="2.4"/></svg>`
+};
+
+// Category -> { css class suffix, icon key }. Colors themselves live in
+// styles.css (restrained Lucknow/heritage tones), keyed off these classes.
+const CATEGORY_META = {
+  "Heritage": {cls: "cat-heritage", icon: "heritage"},
+  "Religious": {cls: "cat-religious", icon: "religious"},
+  "Architecture": {cls: "cat-architecture", icon: "architecture"},
+  "Parks & Outdoors": {cls: "cat-parks", icon: "parks"},
+  "Markets & Streets": {cls: "cat-markets", icon: "markets"},
+  "Museums & Culture": {cls: "cat-museums", icon: "museums"},
+  "Family & Leisure": {cls: "cat-family", icon: "family"},
+  "Food": {cls: "cat-food", icon: "food"}
+};
+
+function categoryMeta(category){
+  return CATEGORY_META[category] || {cls: "cat-default", icon: "default"};
+}
+
 const DESKTOP_MARKER_SIZE = 42;
 const MOBILE_MARKER_SIZE = 38;
 const ACTIVE_MARKER_SIZE = 54;
@@ -81,7 +115,7 @@ function markerSize(active = false){
 }
 
 function markerIcon(site, active = false){
-  const src = site.cover || (site.images?.length ? site.images[0] : "");
+  const src = site.markerImage || site.cover || (site.images?.length ? site.images[0] : "");
   const size = markerSize(active);
   const safeSrc = src ? encodeURI(src).replace(/'/g, "%27") : "";
 
@@ -106,6 +140,13 @@ function categories(){
   }
 
   return list;
+}
+
+// All categories are on by default except Food, which starts unchecked so
+// food markers don't clutter the opening map. Used on initial load and
+// whenever the filters are reset/cleared.
+function defaultActiveCategories(){
+  return new Set(categories().filter(category => category !== "Food"));
 }
 
 function normalizedSearch(){
@@ -136,9 +177,12 @@ function filterMarkup(){
   return categories().map(category => {
     const count = sites.filter(site => (site.category || "Heritage") === category).length;
     const checked = activeCategories.has(category);
+    const meta = categoryMeta(category);
+    const icon = CATEGORY_ICONS[meta.icon] || CATEGORY_ICONS.default;
 
-    return `<label class="filter-chip${checked ? " active" : ""}">
+    return `<label class="filter-chip ${meta.cls}${checked ? " active" : ""}">
       <input type="checkbox" data-category="${escapeHtml(category)}" ${checked ? "checked" : ""}>
+      <span class="filter-chip-icon" aria-hidden="true">${icon}</span>
       <span class="filter-chip-name">${escapeHtml(category)}</span>
       <span class="filter-chip-count">${count}</span>
     </label>`;
@@ -484,7 +528,7 @@ function selectSite(id, fly = false){
 
 function resetAll(){
   activeCategories =
-    new Set(categories());
+    defaultActiveCategories();
 
   selectedId = null;
   homeMode = true;
@@ -748,7 +792,7 @@ async function init(){
     if(!response.ok) throw new Error(`sites.json returned ${response.status}`);
 
     sites = await response.json();
-    activeCategories = new Set(categories());
+    activeCategories = defaultActiveCategories();
     homeMode = true;
 
     renderFilters();

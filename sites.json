@@ -359,13 +359,17 @@
     "summary": "A dense historic commercial district associated with markets, food and everyday urban culture.",
     "commonsQuery": "Aminabad Lucknow",
     "images": [
-      "img/amin/1.jpg",
-      "img/amin/2.jpg"
+      "img/amin/2.jpg",
+      "img/amin/3.jpg",
+      "img/amin/4.jpg",
+      "img/amin/5.jpg"
     ],
     "category": "Markets & Streets",
     "mapsQuery": "Aminabad Market, Lucknow, Uttar Pradesh, India",
     "coordVerified": "high",
-    "coordSource": "https://mapcarta.com/N10759426376"
+    "coordSource": "https://mapcarta.com/N10759426376",
+    "cover": "img/amin/4.jpg",
+    "markerImage": "img/amin/5.jpg"
   },
   {
     "id": "chowk",

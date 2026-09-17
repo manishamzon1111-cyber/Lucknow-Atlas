@@ -361,6 +361,14 @@ code {
   align-items: center;
   margin-top: 9px;
 }
+.image-roles { display: grid; gap: 5px; margin-top: 9px; padding-top: 8px; border-top: 1px solid var(--border); font-size: 12px; }
+.image-roles input, .remove-photo input { width: auto; min-height: auto; }
+.site-picker, .publish-actions { display: grid; grid-template-columns: 1fr 1.2fr auto; gap: 8px; margin-top: 14px; }
+#siteEditor { margin-top: 20px; padding-top: 4px; border-top: 1px solid var(--border); }
+.move-buttons { display: flex; gap: 5px; margin-top: 8px; }
+.move-buttons button { min-height: 30px; padding: 3px 10px; }
+.remove-photo { display: block; margin-top: 9px; color: var(--danger); font-size: 12px; }
+.publish-card { display: grid; grid-template-columns: 1fr minmax(440px, 1.4fr); gap: 24px; align-items: center; }
 .photo-actions input {
   width: auto;
   min-height: auto;
@@ -464,6 +472,7 @@ summary {
   .addbar button {
     width: 100%;
   }
+  .site-picker, .publish-actions, .publish-card { grid-template-columns: 1fr; }
 }
 @media (max-width: 460px) {
   .status {

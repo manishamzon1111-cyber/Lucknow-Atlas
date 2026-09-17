@@ -65,6 +65,19 @@
           <p class="muted">Loading suggestions…</p>
         </div>
       </section>
+      <section class="card">
+        <div class="section-head">
+          <div><h2>Edit an existing place</h2><p>Update details, reorder photos, or choose distinct cover and map-pin images.</p></div>
+          <button id="reloadSites" class="secondary">Reload</button>
+        </div>
+        <div class="site-picker"><input id="siteSearch" placeholder="Filter existing places"><select id="siteSelect"><option>Loading places…</option></select><button id="editSite">Edit</button></div>
+        <div id="siteEditor" class="hidden">
+          <form id="editForm" class="fields"></form>
+          <div class="subhead"><div><h3>Current photos</h3><p>Use arrows to reorder. Cover is used in cards; map pin is used on the map.</p></div></div>
+          <div id="editPhotos" class="photos"></div>
+          <div class="addbar"><p>Saving creates a dated <code>sites.json</code> backup.</p><button id="saveSite" type="button">Save changes</button></div>
+        </div>
+      </section>
       <section id="review" class="card hidden">
         <div class="section-head">
           <div>
@@ -80,8 +93,8 @@
           <div>
             <h3>Photo candidates</h3>
             <p>
-              Select 1–8. The first selected photo becomes the cover unless you
-              choose another.
+              Select 1–8 verified images (minimum 1200×700), then choose the
+              gallery cover and map-pin image separately.
             </p>
           </div>
           <span id="photoCount" class="pill">0 selected</span>
@@ -95,6 +108,10 @@
           <p id="saveNote">Nothing changes until you press Add.</p>
           <button id="addBtn" type="button" class="add">Add to Atlas</button>
         </div>
+      </section>
+      <section class="card publish-card">
+        <div><h2>Publish to GitHub</h2><p id="publishState">Check pending changes before publishing.</p></div>
+        <div class="publish-actions"><input id="commitMessage" maxlength="120" value="Update Lucknow Atlas places"><button id="checkPublish" class="secondary">Check</button><button id="publish">Publish main</button></div>
       </section>
     </main>
     <div id="toast" class="toast hidden"></div>
