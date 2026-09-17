@@ -1,4 +1,10 @@
 .DS_Store
+tool/node_modules/
+tool/backups/
+tool/.stage-*/
+tool/config.json
+tool/.txn.json
+tool/.txn.*.tmp
 .vercel
 node_modules
 *.log

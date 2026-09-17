@@ -99,7 +99,13 @@ function markerIcon(site, active = false){
 }
 
 function categories(){
-  return [...new Set(sites.map(site => site.category || "Heritage"))];
+  const list = [...new Set(sites.map(site => site.category || "Heritage"))];
+
+  if(!list.includes("Food")){
+    list.push("Food");
+  }
+
+  return list;
 }
 
 function normalizedSearch(){
@@ -178,40 +184,34 @@ function buildHomePattern(list){
     );
   });
 
-  const rings = [
-    {
-      count: 8,
-      latRadius: .0105,
-      lngRadius: .0145
-    },
-    {
-      count: 10,
-      latRadius: .0185,
-      lngRadius: .0255
-    },
-    {
-      count: 12,
-      latRadius: .0270,
-      lngRadius: .0375
-    }
-  ];
-
   const slots = [];
 
-  for(const ring of rings){
-    for(let i = 0; i < ring.count; i++){
+  const ringSizes = [8, 10, 12];
+  let placed = 0;
+  let ringIndex = 0;
+
+  while(placed < ordered.length){
+    const count =
+      ringSizes[ringIndex] ||
+      Math.max(14, 12 + (ringIndex - 2) * 4);
+
+    const latRadius = .0105 + ringIndex * .0085;
+    const lngRadius = .0145 + ringIndex * .0110;
+
+    for(let i = 0; i < count && placed < ordered.length; i++){
       const angle =
-        (-90 + (360 / ring.count) * i)
+        (-90 + (360 / count) * i)
         * Math.PI / 180;
 
       slots.push([
-        center[0]
-          + Math.sin(angle) * ring.latRadius,
-
-        center[1]
-          + Math.cos(angle) * ring.lngRadius
+        center[0] + Math.sin(angle) * latRadius,
+        center[1] + Math.cos(angle) * lngRadius
       ]);
+
+      placed++;
     }
+
+    ringIndex++;
   }
 
   return ordered.map((site, index) => ({

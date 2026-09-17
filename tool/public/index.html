@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Lucknow Atlas · Place review</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header>
+      <div class="brand">
+        <div class="brand-mark">LA</div>
+        <div>
+          <h1>Lucknow Atlas Admin</h1>
+          <p>Review suggestions and add verified places</p>
+        </div>
+      </div>
+      <div id="status" class="status">Connecting…</div>
+    </header>
+    <main>
+      <section class="card">
+        <div class="section-head">
+          <div>
+            <h2>Search providers</h2>
+            <p>Keys stay only on this Mac.</p>
+          </div>
+          <button id="settingsToggle" class="secondary">Configure</button>
+        </div>
+        <form id="settingsForm" class="settings hidden">
+          <label class="field"
+            ><span>Serper.dev key</span
+            ><input
+              id="serperKey"
+              type="password"
+              autocomplete="off"
+              placeholder="Paste a new key"
+          /></label>
+          <button>Save keys locally</button>
+          <p id="providerState" class="muted"></p>
+        </form>
+      </section>
+      <section class="card search-card">
+        <div>
+          <h2>Find a place</h2>
+          <p>Research a place that has not been suggested.</p>
+        </div>
+        <form id="searchForm">
+          <input
+            id="searchName"
+            required
+            maxlength="120"
+            placeholder="e.g. Dilkusha Kothi"
+          /><button>Search</button>
+        </form>
+      </section>
+      <section class="card">
+        <div class="section-head">
+          <div>
+            <h2>Suggestions</h2>
+            <p>Open submissions from the Atlas website.</p>
+          </div>
+          <button id="refresh" class="secondary">Refresh</button>
+        </div>
+        <div id="issues" class="issues">
+          <p class="muted">Loading suggestions…</p>
+        </div>
+      </section>
+      <section id="review" class="card hidden">
+        <div class="section-head">
+          <div>
+            <p class="section-label">Place review</p>
+            <h2 id="reviewTitle">Research result</h2>
+          </div>
+          <button id="discard" class="secondary danger">Discard</button>
+        </div>
+        <div id="warnings"></div>
+        <form id="draftForm" class="fields"></form>
+        <section id="coordinateReview" class="coordinate-review"></section>
+        <div class="subhead">
+          <div>
+            <h3>Photo candidates</h3>
+            <p>
+              Select 1–8. The first selected photo becomes the cover unless you
+              choose another.
+            </p>
+          </div>
+          <span id="photoCount" class="pill">0 selected</span>
+        </div>
+        <div id="photos" class="photos"></div>
+        <details>
+          <summary>Research sources</summary>
+          <div id="sources" class="sources"></div>
+        </details>
+        <div class="addbar">
+          <p id="saveNote">Nothing changes until you press Add.</p>
+          <button id="addBtn" type="button" class="add">Add to Atlas</button>
+        </div>
+      </section>
+    </main>
+    <div id="toast" class="toast hidden"></div>
+    <script src="app.js" type="module"></script>
+  </body>
+</html>
