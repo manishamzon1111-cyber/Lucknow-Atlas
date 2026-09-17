@@ -6,6 +6,10 @@ It brings together major monuments, historic buildings, religious sites, cultura
 
 The goal is to make exploring Lucknow easier than browsing through long lists of attractions. Each location can be opened directly from the map to view photographs, basic information, and its geographic location, with quick access to directions.
 
+## Development note
+
+Built with a bit of brain and a bit of AI. AI helped with coding, debugging and research, but the project was put together, tested and refined manually.
+
 ## Features
 
 - Interactive map of Lucknow landmarks and heritage sites
