@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0f2634">
+  <meta name="description" content="Lucknow Atlas — an interactive map of historic Lucknow.">
+  <title>Lucknow Atlas</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link href="https://unpkg.com/maplibre-gl@5/dist/maplibre-gl.css" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand">
+  <div class="brand-mark" aria-hidden="true">
+    <svg viewBox="0 0 40 40">
+      <path d="M8 34V19c0-6.8 5.2-12.3 12-12.3S32 12.2 32 19v15"></path>
+      <path d="M13 34V20.5c0-4 3-7.2 7-7.2s7 3.2 7 7.2V34"></path>
+      <path d="M18 34V24.5c0-1.2.9-2.2 2-2.2s2 1 2 2.2V34"></path>
+      <path d="M6 34h28"></path>
+      <path d="M20 4v3"></path>
+      <path d="M17.5 6.5 20 4l2.5 2.5"></path>
+    </svg>
+  </div>
+  <h1>Lucknow Atlas</h1>
+    </div>
+
+    <div class="top-actions">
+      <div class="search">
+        <span>⌕</span>
+        <input id="search" type="search" placeholder="Search places">
+      </div>
+      <button id="filterOpen" class="icon-button mobile-only" aria-label="Open filters">
+  <svg
+    class="filter-icon"
+    viewBox="0 0 24 24"
+    aria-hidden="true"
+  >
+    <path d="M4 7h10"></path>
+    <path d="M18 7h2"></path>
+    <circle cx="16" cy="7" r="2"></circle>
+
+    <path d="M4 17h2"></path>
+    <path d="M10 17h10"></path>
+    <circle cx="8" cy="17" r="2"></circle>
+  </svg>
+</button>
+      <button id="fitBtn" class="text-button desktop-only">Fit all</button>
+      <button id="nearBtn" class="text-button desktop-only">Near me</button>
+    </div>
+  </header>
+
+  <main class="workspace">
+    <aside id="filterRail" class="filter-rail">
+      <div class="rail-head">
+        <h2>Explore Lucknow</h2>
+        <button id="resetFilters" class="plain-link">Clear</button>
+      </div>
+
+      <div id="filterList" class="filter-list"></div>
+
+      <div class="rail-divider"></div>
+
+      <div class="rail-head compact">
+        <h2 id="visibleCount">0 places</h2>
+      </div>
+
+      <div id="siteList" class="site-list"></div>
+    </aside>
+
+    <section class="map-stage">
+      <div id="map"></div>
+
+      <div class="map-controls-mobile mobile-only">
+        <button id="fitBtnMobile">Fit all</button>
+        <button id="nearBtnMobile">Near me</button>
+      </div>
+
+      <div class="map-caption desktop-only">Tap a point to explore a place</div>
+
+      <aside id="detailDrawer" class="detail-drawer hidden">
+        <button id="detailClose" class="detail-close" aria-label="Close">×</button>
+
+        <div class="gallery">
+          <div class="gallery-main">
+            <button id="galleryPrev" class="gallery-arrow prev" aria-label="Previous photo">‹</button>
+            <img id="detailImage" alt="">
+            <div id="imageFallback" class="image-fallback">Loading photos…</div>
+            <button id="galleryNext" class="gallery-arrow next" aria-label="Next photo">›</button>
+            <div id="galleryCount" class="gallery-count"></div>
+          </div>
+          <div id="thumbStrip" class="thumb-strip"></div>
+        </div>
+
+        <div class="detail-body">
+          <div class="meta">
+            <span id="detailPeriod"></span>
+            <span id="detailYear"></span>
+          </div>
+          <h2 id="detailTitle"></h2>
+          <p id="detailSummary"></p>
+
+          <div class="detail-actions">
+            <button id="focusBtn" class="button dark">Focus on map</button>
+            <a id="directionsLink" class="button light" target="_blank" rel="noreferrer">Directions</a>
+          </div>
+
+          <a id="wikiLink" class="wiki" target="_blank" rel="noreferrer">Wikipedia</a>
+        </div>
+      </aside>
+
+      <section id="mobileSheet" class="mobile-sheet mobile-only hidden">
+        <div class="sheet-handle"></div>
+        <div class="sheet-top">
+          <div>
+            <div class="sheet-meta" id="sheetMeta"></div>
+            <h2 id="sheetTitle"></h2>
+          </div>
+          <button id="sheetExpand" class="sheet-expand">Open</button>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <aside id="filterDrawer" class="filter-drawer mobile-only">
+    <div class="drawer-backdrop" id="drawerBackdrop"></div>
+    <div class="drawer-panel">
+      <div class="drawer-head">
+        <h2>Explore Lucknow</h2>
+        <button id="filterClose" class="icon-button" aria-label="Close filters">×</button>
+      </div>
+      <div id="filterListMobile" class="filter-list"></div>
+
+      <div class="rail-divider"></div>
+
+      <div class="rail-head compact">
+        <h2>Places</h2>
+      </div>
+
+      <div id="siteListMobile" class="site-list"></div>
+
+      <div class="drawer-footer">
+        <button id="resetFiltersMobile" class="text-button">Clear</button>
+        <button id="applyFilters" class="button dark">Done</button>
+      </div>
+    </div>
+  </aside>
+
+  <div id="lightbox" class="lightbox hidden" aria-hidden="true">
+    <button id="lightboxClose" class="lightbox-close" aria-label="Close">×</button>
+    <button id="lightboxPrev" class="lightbox-arrow left" aria-label="Previous photo">‹</button>
+    <img id="lightboxImage" alt="">
+    <button id="lightboxNext" class="lightbox-arrow right" aria-label="Next photo">›</button>
+    <div id="lightboxCount" class="lightbox-count"></div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@5/dist/maplibre-gl.js"></script>
+  <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet/leaflet-maplibre-gl.js"></script>
+<script src="app.js"></script>
+  <script src="search-suggest.js"></script>
+</body>
+</html>

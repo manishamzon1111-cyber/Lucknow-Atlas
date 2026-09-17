@@ -1,0 +1,31 @@
+id,place,lat,lng,confidence,note,source
+bara-imambara,Bara Imambara,26.8684472,80.9127083,high,NMA GPS coordinate for Imambara of Asaf-ud-Daula,https://nma.gov.in/showfile.php?lang=2&level=1&lid=1425&ls_id=1163&nma_type=0
+rumi-darwaza,Rumi Darwaza,26.8712778,80.9122250,high,NMA GPS coordinate for Rumi Darwaza,https://nma.gov.in/showfile.php?lang=2&level=1&lid=1425&ls_id=1163&nma_type=0
+chota-imambara,Chota Imambara,26.8737840,80.9044090,high,Published monument coordinate,https://mapcarta.com/W214212792
+satkhanda,Satkhanda,26.8748900,80.9059100,high,OpenStreetMap monument point,https://mapcarta.com/N10770841599
+clock-tower,Husainabad Clock Tower,26.8740000,80.9080100,high,OpenStreetMap tower footprint,https://mapcarta.com/W214215447
+residency,British Residency,26.8618000,80.9257000,high,Published Residency coordinate,https://commons.wikimedia.org/wiki/File:Residency-Lko_01.jpg
+sikandar-bagh,Sikandar Bagh,26.8555778,80.9524139,high,Published Sikandar Bagh coordinate matching Butler Colony/NBRI location,https://en.wikipedia.org/wiki/Sikandar_Bagh
+kaiserbagh,Kaiserbagh Palace Complex,26.8523569,80.9319375,medium,"Representative center of palace complex, midpoint of NMA East and West Kaiserbagh Gates",https://www.nma.gov.in/showfile.php?lang=1&level=2&lid=1608&ls_id=1409&nma_type=0
+safed-baradari,Safed Baradari,26.8523125,80.9319531,high,Decoded center of Google/venue Plus Code VW2J+WQG,https://weddingz.in/lucknow/safed-baradari-qaiserbagh/
+shah-najaf,Shah Najaf Imambara,26.8597306,80.9462528,high,Wikidata monument coordinate,https://www.wikidata.org/wiki/Q16978007
+saadat-ali-tomb,Tomb of Saadat Ali Khan II,26.8542667,80.9335972,high,NMA GPS coordinate for Tomb of Saadat Ali Khan,https://www.nma.gov.in/showfile.php?lang=1&level=2&lid=1667&ls_id=1379&nma_type=0
+dilkusha-kothi,Dilkusha Kothi,26.8286375,80.9647344,high,Decoded center of Google Maps Plus Code RXH7+FV5 for Dilkusha Kothi,https://www.google.com/maps/search/Dilkusha%2BKothi%2C%2BLucknow%2C%2BIndia
+la-martiniere,La Martinière (Constantia),26.8395611,80.9632194,high,Wikidata coordinate for La Martiniere Lucknow,https://www.wikidata.org/wiki/Q2994933
+begum-hazrat-mahal-park,Begum Hazrat Mahal Park,26.8564875,80.9341094,high,Decoded center of listed Plus Code VW4M+HJX / park address,https://wanderlog.com/place/details/146507
+charbagh,Lucknow Charbagh Station,26.8306806,80.9252889,high,Wikidata station coordinate backed by Indian Railways dataset,https://www.wikidata.org/wiki/Q3633969
+aminabad,Aminabad,26.8468010,80.9263735,high,OpenStreetMap marketplace point,https://mapcarta.com/N10759426376
+chowk,Lucknow Chowk,26.8656500,80.9036400,medium,"Apple Maps locality/POI center; Chowk is an area, not a single building",https://maps.apple.com/place?auid=5910541325409860158
+janeshwar,Janeshwar Mishra Park,26.8348990,80.9886860,high,Published park coordinate,https://wiki.arcsnet.dev/content/wikipedia_en_all_maxi_2026-02/Janeshwar_Mishra_Park
+riverfront,Gomti Riverfront,26.8450000,80.9703800,high,OpenStreetMap Gomti RiverFront Park geometry,https://mapcarta.com/W1137839363
+ambedkar,Dr. B. R. Ambedkar Memorial Park,26.8471600,80.9758700,high,OpenStreetMap memorial square geometry,https://mapcarta.com/W211343722
+museum,State Museum Lucknow,26.8453900,80.9549800,high,OpenStreetMap State Museum building geometry,https://mapcarta.com/W212876827
+planetarium,Indira Gandhi Planetarium,26.8650500,80.9236000,high,OpenStreetMap planetarium point,https://mapcarta.com/N5190331424
+chandrika,Chandrika Devi Temple,27.0203300,80.8297500,high,OpenStreetMap Chandrika Devi Temple building,https://mapcarta.com/W214467286
+buddha-park,Gautam Buddha Park,26.8695400,80.9196700,high,OpenStreetMap Gautam Buddha Park in Sadar (not the different Sarojani Nagar park),https://mapcarta.com/W212500741
+hazratganj,Hazratganj,26.8475600,80.9431400,medium,"Center of OpenStreetMap Hazratganj commercial area; this is a district/market, not one building",https://mapcarta.com/W213237648
+lohia-park,Dr. Ram Manohar Lohia Park,26.8541600,80.9805900,high,OpenStreetMap Dr Ram Manohar Lohia Park geometry,https://mapcarta.com/W211375521
+lucknow-zoo,Nawab Wajid Ali Shah Zoological Garden,26.8446600,80.9534100,high,Apple Maps Lucknow Zoo coordinate,https://maps.apple.com/place?auid=13886963030749989196
+hanuman-setu,Hanuman Setu Mandir,26.8605000,80.9376500,high,OpenStreetMap Sankat Mochan Hanuman Temple / Hanuman Setu Temple point,https://mapcarta.com/36745764
+aliganj-hanuman,Aliganj Hanuman Mandir,26.8841192,80.9474771,high,Published Naya/Purana Hanuman Mandir Aliganj coordinate,https://www.bhaktibharat.com/en/mandir/naya-hanuman-mandir
+kukrail,Kukrail Forest & Gharial Centre,26.9102625,80.9878594,high,Decoded center of Google business Plus Code WX6Q+445; corroborated by listed lat/long,https://datagemba.com/b/v/in/lucknow/parks/ChIJuSjwLPVXmTkRhkuFNmjsNbY
