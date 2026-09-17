@@ -149,33 +149,6 @@ function defaultActiveCategories(){
   return new Set(categories().filter(category => category !== "Food"));
 }
 
-function hasValidCoords(site){
-  if(!site) return false;
-
-  if(
-    site.lat === null ||
-    site.lat === undefined ||
-    site.lat === "" ||
-    site.lng === null ||
-    site.lng === undefined ||
-    site.lng === ""
-  ){
-    return false;
-  }
-
-  const lat = Number(site.lat);
-  const lng = Number(site.lng);
-
-  return (
-    Number.isFinite(lat) &&
-    Number.isFinite(lng) &&
-    lat >= -90 &&
-    lat <= 90 &&
-    lng >= -180 &&
-    lng <= 180
-  );
-}
-
 function normalizedSearch(){
   return qs("#search").value.trim().toLowerCase();
 }
@@ -367,18 +340,7 @@ function renderSiteList(){
 }
 
 function boundsFor(list){
-  const valid = list.filter(hasValidCoords);
-
-  if(!valid.length){
-    return null;
-  }
-
-  return L.latLngBounds(
-    valid.map(site => [
-      Number(site.lat),
-      Number(site.lng)
-    ])
-  );
+  return L.latLngBounds(list.map(site => [Number(site.lat), Number(site.lng)]));
 }
 
 function fitHome(){
@@ -405,7 +367,7 @@ function fitHome(){
 }
 
 function fitVisible(){
-  const visible = visibleSites().filter(hasValidCoords);
+  const visible = visibleSites();
   if(!visible.length) return;
 
   if(visible.length === 1){
@@ -413,10 +375,7 @@ function fitVisible(){
     return;
   }
 
-  const bounds = boundsFor(visible);
-  if(!bounds) return;
-
-  map.fitBounds(bounds.pad(.12), {
+  map.fitBounds(boundsFor(visible).pad(.12), {
     maxZoom: isMobile() ? 13 : 14,
     animate: true
   });
@@ -424,16 +383,13 @@ function fitVisible(){
 
 function fitSearchResults(){
   if(!normalizedSearch()) return;
-  const visible = visibleSites().filter(hasValidCoords);
+  const visible = visibleSites();
   if(!visible.length) return;
 
   if(visible.length === 1){
     map.flyTo([visible[0].lat, visible[0].lng], 15, {duration: .3});
   }else{
-    const bounds = boundsFor(visible);
-    if(!bounds) return;
-
-    map.fitBounds(bounds.pad(.18), {
+    map.fitBounds(boundsFor(visible).pad(.18), {
       maxZoom: 14,
       animate: true
     });
@@ -520,9 +476,9 @@ async function showDetail(site){
 
   qs("#detailYear").textContent = site.year || "";
   qs("#detailSummary").textContent = site.summary || "";
-  if (site.mapsUrl) {
+  if(site.mapsUrl){
     qs("#directionsLink").href = site.mapsUrl;
-  } else {
+  }else{
     const directionsDestination =
       site.mapsQuery ||
       `${site.name}, Lucknow, Uttar Pradesh, India`;
@@ -556,7 +512,7 @@ function selectSite(id, fly = false){
 
   if(!site) return;
 
-  if(fly && hasValidCoords(site)){
+  if(fly){
     homeMode = false;
   }
 
@@ -566,7 +522,7 @@ function selectSite(id, fly = false){
   renderSiteList();
   showDetail(site);
 
-  if(fly && hasValidCoords(site)){
+  if(fly){
     map.flyTo(
       [
         Number(site.lat),
@@ -667,7 +623,7 @@ function nearMe(){
     const lng = position.coords.longitude;
 
     const ranked = sites
-      .filter(hasValidCoords)
+      .filter(site => Number.isFinite(Number(site.lat)) && Number.isFinite(Number(site.lng)))
       .map(site => ({
         ...site,
         distance: distanceKm(lat, lng, Number(site.lat), Number(site.lng))
@@ -761,22 +717,9 @@ function wire(){
   });
 
   const fitAllReal = () => {
-    window.clearTimeout(searchTimer);
-    qs("#search").value = "";
-
-    selectedId = null;
     homeMode = false;
-
-    document.body.classList.remove("sidebar-collapsed");
-
     renderMarkers();
-
-    qs("#siteList").innerHTML = "";
-    const mobileList = qs("#siteListMobile");
-    if(mobileList) mobileList.innerHTML = "";
-
     fitVisible();
-    window.setTimeout(() => map.invalidateSize(), 180);
   };
 
   qs("#fitBtn")
@@ -811,7 +754,7 @@ function wire(){
 
   qs("#focusBtn").addEventListener("click", () => {
     const site = sites.find(item => item.id === selectedId);
-    if(!site || !hasValidCoords(site)) return;
+    if(!site) return;
 
     if(isMobile()){
       qs("#detailDrawer").classList.add("hidden");
@@ -876,15 +819,3 @@ async function init(){
 }
 
 init();
-
-
-/* Active map marker must always stay above overlapping markers */
-document.addEventListener("click", (e) => {
-  const marker = e.target.closest?.(".leaflet-marker-icon");
-  if (!marker) return;
-
-  document.querySelectorAll(".leaflet-marker-icon.atlas-active-pin")
-    .forEach(el => el.classList.remove("atlas-active-pin"));
-
-  marker.classList.add("atlas-active-pin");
-}, true);

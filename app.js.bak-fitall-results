@@ -764,10 +764,7 @@ function wire(){
     window.clearTimeout(searchTimer);
     qs("#search").value = "";
 
-    selectedId = null;
     homeMode = false;
-
-    document.body.classList.remove("sidebar-collapsed");
 
     renderMarkers();
 
@@ -775,8 +772,8 @@ function wire(){
     const mobileList = qs("#siteListMobile");
     if(mobileList) mobileList.innerHTML = "";
 
+    selectedId = null;
     fitVisible();
-    window.setTimeout(() => map.invalidateSize(), 180);
   };
 
   qs("#fitBtn")

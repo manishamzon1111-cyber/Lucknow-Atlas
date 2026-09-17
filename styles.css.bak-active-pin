@@ -1415,17 +1415,3 @@ body.suggest-open{
   padding-left:12px !important;
   padding-right:8px !important;
 }
-
-/* Keep selected map pin above overlapping pins */
-.leaflet-marker-icon.active,
-.leaflet-marker-icon.is-active,
-.leaflet-marker-icon.selected,
-.leaflet-marker-icon.marker-active {
-  z-index: 10000 !important;
-}
-
-
-/* Selected Leaflet marker always on top */
-.leaflet-marker-icon.atlas-active-pin {
-  z-index: 1000000 !important;
-}

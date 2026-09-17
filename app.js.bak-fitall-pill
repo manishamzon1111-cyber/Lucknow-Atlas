@@ -767,8 +767,6 @@ function wire(){
     selectedId = null;
     homeMode = false;
 
-    document.body.classList.remove("sidebar-collapsed");
-
     renderMarkers();
 
     qs("#siteList").innerHTML = "";
@@ -776,7 +774,6 @@ function wire(){
     if(mobileList) mobileList.innerHTML = "";
 
     fitVisible();
-    window.setTimeout(() => map.invalidateSize(), 180);
   };
 
   qs("#fitBtn")

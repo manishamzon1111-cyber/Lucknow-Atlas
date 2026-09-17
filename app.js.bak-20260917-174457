@@ -520,9 +520,9 @@ async function showDetail(site){
 
   qs("#detailYear").textContent = site.year || "";
   qs("#detailSummary").textContent = site.summary || "";
-  if (site.mapsUrl) {
+  if(site.mapsUrl){
     qs("#directionsLink").href = site.mapsUrl;
-  } else {
+  }else{
     const directionsDestination =
       site.mapsQuery ||
       `${site.name}, Lucknow, Uttar Pradesh, India`;
@@ -761,22 +761,9 @@ function wire(){
   });
 
   const fitAllReal = () => {
-    window.clearTimeout(searchTimer);
-    qs("#search").value = "";
-
-    selectedId = null;
     homeMode = false;
-
-    document.body.classList.remove("sidebar-collapsed");
-
     renderMarkers();
-
-    qs("#siteList").innerHTML = "";
-    const mobileList = qs("#siteListMobile");
-    if(mobileList) mobileList.innerHTML = "";
-
     fitVisible();
-    window.setTimeout(() => map.invalidateSize(), 180);
   };
 
   qs("#fitBtn")
@@ -876,15 +863,3 @@ async function init(){
 }
 
 init();
-
-
-/* Active map marker must always stay above overlapping markers */
-document.addEventListener("click", (e) => {
-  const marker = e.target.closest?.(".leaflet-marker-icon");
-  if (!marker) return;
-
-  document.querySelectorAll(".leaflet-marker-icon.atlas-active-pin")
-    .forEach(el => el.classList.remove("atlas-active-pin"));
-
-  marker.classList.add("atlas-active-pin");
-}, true);

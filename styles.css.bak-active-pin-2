@@ -1423,9 +1423,3 @@ body.suggest-open{
 .leaflet-marker-icon.marker-active {
   z-index: 10000 !important;
 }
-
-
-/* Selected Leaflet marker always on top */
-.leaflet-marker-icon.atlas-active-pin {
-  z-index: 1000000 !important;
-}

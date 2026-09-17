@@ -761,22 +761,9 @@ function wire(){
   });
 
   const fitAllReal = () => {
-    window.clearTimeout(searchTimer);
-    qs("#search").value = "";
-
-    selectedId = null;
     homeMode = false;
-
-    document.body.classList.remove("sidebar-collapsed");
-
     renderMarkers();
-
-    qs("#siteList").innerHTML = "";
-    const mobileList = qs("#siteListMobile");
-    if(mobileList) mobileList.innerHTML = "";
-
     fitVisible();
-    window.setTimeout(() => map.invalidateSize(), 180);
   };
 
   qs("#fitBtn")
