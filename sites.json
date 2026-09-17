@@ -712,5 +712,25 @@
     ],
     "category": "Museums & Culture",
     "cover": "img/rashtra-prerna-sthal/1.jpg"
+  },
+  {
+    "id": "khatu-shyam-lucknow",
+    "name": "Shri Khatu Shyam Ji Temple",
+    "category": "Religious",
+    "period": "",
+    "year": "",
+    "lat": 26.8620415,
+    "lng": 80.9469458,
+    "wiki": "",
+    "summary": "Shri Khatu Shyam Mandir, Lucknow Temple is situated on banks of river Gomti, Purana Hyderabad, Lucknow.",
+    "images": [
+      "img/khatshyaluck/1.jpg",
+      "img/khatshyaluck/2.jpg",
+      "img/khatshyaluck/3.jpg"
+    ],
+    "cover": "img/khatshyaluck/3.jpg",
+    "mapsQuery": "Khatu Shyam Park, Hazratganj, Lucknow, Uttar Pradesh, India",
+    "coordVerified": "high",
+    "coordSource": "https://www.google.com/maps/search/?api=1&query=Shri%20Khatu%20Shyam%20Ji%20Temple%2C%20Lucknow"
   }
 ]
