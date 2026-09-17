@@ -628,5 +628,89 @@
     "mapsQuery": "Kukrail Gharial Rehabilitation Centre, Lucknow, Uttar Pradesh, India",
     "coordVerified": "high",
     "coordSource": "https://datagemba.com/b/v/in/lucknow/parks/ChIJuSjwLPVXmTkRhkuFNmjsNbY"
+  },
+  {
+    "id": "musa-bagh",
+    "name": "Musa Bagh",
+    "period": "Nawabi",
+    "year": "18th–19th century",
+    "lat": 26.889843,
+    "lng": 80.874238,
+    "wiki": "Musa Bagh",
+    "summary": "The surviving ruins of the historic Musa Bagh garden and palace complex in western Lucknow, associated with the Nawabi period and the events of 1857.",
+    "commonsQuery": "Musa Bagh Lucknow",
+    "images": [
+      "img/musa-bagh/1.jpg",
+      "img/musa-bagh/2.jpg"
+    ],
+    "category": "Heritage",
+    "cover": "img/musa-bagh/1.jpg"
+  },
+  {
+    "id": "baba-hazara-bagh",
+    "name": "Baba Hazara Bagh",
+    "period": "Nawabi",
+    "year": "18th century",
+    "lat": 26.867463,
+    "lng": 80.895547,
+    "wiki": "",
+    "summary": "A historic religious and memorial complex in Thakurganj associated with Baba Hazara and the Nanak-shahi tradition, containing old samadhis and Nawabi-era architectural elements.",
+    "commonsQuery": "Baba Hazara Bagh Lucknow",
+    "images": [
+      "img/baba-hazara-bagh/1.webp"
+    ],
+    "category": "Heritage",
+    "cover": "img/baba-hazara-bagh/1.webp"
+  },
+  {
+    "id": "kakori-train-action-site",
+    "name": "Kakori Train Action Site",
+    "period": "Freedom Movement",
+    "year": "1925",
+    "lat": 26.874863,
+    "lng": 80.818734,
+    "wiki": "Kakori conspiracy",
+    "summary": "The area associated with the Kakori Train Action of 9 August 1925, when members of the Hindustan Republican Association stopped a train carrying British government treasury funds.",
+    "commonsQuery": "Kakori Train Action",
+    "images": [
+      "img/kakori-train-action-site/1.jpg",
+      "img/kakori-train-action-site/2.jpg"
+    ],
+    "category": "Heritage",
+    "cover": "img/kakori-train-action-site/1.jpg"
+  },
+  {
+    "id": "kakori-shaheed-smarak",
+    "name": "Kakori Shaheed Smarak",
+    "period": "Memory",
+    "year": "Freedom movement memorial",
+    "lat": 26.875088,
+    "lng": 80.818891,
+    "wiki": "Kakori conspiracy",
+    "summary": "A memorial complex at Kakori commemorating the revolutionaries connected with the 1925 Kakori Train Action.",
+    "commonsQuery": "Kakori Shaheed Smarak",
+    "images": [
+      "img/kakori-shaheed-smarak/1.jpg"
+    ],
+    "category": "Heritage",
+    "cover": "img/kakori-shaheed-smarak/1.jpg"
+  },
+  {
+    "id": "rashtra-prerna-sthal",
+    "name": "Rashtra Prerna Sthal",
+    "period": "Modern Lucknow",
+    "year": "2025",
+    "lat": 26.895688,
+    "lng": 80.877313,
+    "wiki": "",
+    "summary": "A large modern memorial and museum complex in Lucknow featuring monumental statues, landscaped public space and exhibitions on twentieth-century Indian political and public life.",
+    "commonsQuery": "Rashtra Prerna Sthal Lucknow",
+    "images": [
+      "img/rashtra-prerna-sthal/1.jpg",
+      "img/rashtra-prerna-sthal/2.jpg",
+      "img/rashtra-prerna-sthal/3.jpg"
+    ],
+    "category": "Museums & Culture",
+    "cover": "img/rashtra-prerna-sthal/1.jpg"
   }
 ]
