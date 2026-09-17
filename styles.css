@@ -120,7 +120,7 @@ body.sidebar-collapsed .filter-rail{opacity:0;pointer-events:none;overflow:hidde
   position:relative;
   min-height:40px;
   display:grid;
-  grid-template-columns:16px minmax(0,1fr) auto;
+  grid-template-columns:22px minmax(0,1fr) auto;
   align-items:center;
   gap:10px;
   padding:0 9px;
@@ -132,11 +132,54 @@ body.sidebar-collapsed .filter-rail{opacity:0;pointer-events:none;overflow:hidde
   cursor:pointer;
 }
 .filter-chip:hover{background:#f7f9f9}
-.filter-chip::before{content:"";width:12px;height:14px;border:1px solid #a8b1b4;border-bottom:0;border-radius:7px 7px 2px 2px}
 .filter-chip.active{background:var(--accent-soft);border-color:#dce7e7;color:#244e55;font-weight:650}
-.filter-chip.active::before{background:var(--accent);border-color:var(--accent)}
 .filter-chip input{position:absolute;opacity:0;pointer-events:none}
 .filter-chip-count{color:#8c979b;font-size:10px;font-weight:600}
+
+/* ---------- category filter icons ---------- */
+/* One outline SVG per category (inline, currentColor) sits in the first
+   grid column. Icon carries the category's own restrained heritage-tone
+   colour at all times; the active/checked state is communicated by the
+   row's subtle tint + border + bold text, not by the icon changing shape. */
+.filter-chip-icon{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:20px;
+  height:20px;
+  flex-shrink:0;
+  color:#9aa4a7;
+  opacity:.6;
+}
+.filter-chip-icon svg{display:block;width:20px;height:20px}
+.filter-chip.active .filter-chip-icon{opacity:1}
+
+.filter-chip.cat-heritage .filter-chip-icon{color:#a9793f}
+.filter-chip.cat-heritage.active{background:#f7f8f8;border-color:#d7dddf;color:#2f3b3f}
+
+.filter-chip.cat-religious .filter-chip-icon{color:#8a4256}
+.filter-chip.cat-religious.active{background:#f7f8f8;border-color:#d7dddf;color:#2f3b3f}
+
+.filter-chip.cat-architecture .filter-chip-icon{color:#5b6a73}
+.filter-chip.cat-architecture.active{background:#f7f8f8;border-color:#d7dddf;color:#2f3b3f}
+
+.filter-chip.cat-parks .filter-chip-icon{color:#628242}
+.filter-chip.cat-parks.active{background:#f7f8f8;border-color:#d7dddf;color:#2f3b3f}
+
+.filter-chip.cat-markets .filter-chip-icon{color:#b3822e}
+.filter-chip.cat-markets.active{background:#f7f8f8;border-color:#d7dddf;color:#2f3b3f}
+
+.filter-chip.cat-museums .filter-chip-icon{color:#75648f}
+.filter-chip.cat-museums.active{background:#f7f8f8;border-color:#d7dddf;color:#2f3b3f}
+
+.filter-chip.cat-family .filter-chip-icon{color:#3f7f8f}
+.filter-chip.cat-family.active{background:#f7f8f8;border-color:#d7dddf;color:#2f3b3f}
+
+.filter-chip.cat-food .filter-chip-icon{color:#b3603c}
+.filter-chip.cat-food.active{background:#f7f8f8;border-color:#d7dddf;color:#2f3b3f}
+
+.filter-chip.cat-default .filter-chip-icon{color:#7a8a90}
+.filter-chip.cat-default.active{background:var(--accent-soft);border-color:#dce7e7;color:#244e55}
 .rail-divider{height:1px;margin:16px 18px 12px;background:linear-gradient(90deg,transparent,#d9d4ca 18%,#d9d4ca 82%,transparent)}
 .rail-head.compact{padding:0 18px 8px}
 .rail-head.compact h2{font-family:inherit;color:#8b734d;font-size:10px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase}
@@ -919,241 +962,456 @@ body.suggest-open{
   }
 }
 
-/* ===== Lucknow Atlas sidebar palette ===== */
+/* ===== Premium white category pills ===== */
 
-.sidebar {
-  background: #f3eadc;
-  border-right-color: #d8c7ad;
+.filter-chip{
+  background:#fff !important;
+  border:1px solid #dde3e5 !important;
+  color:#344247 !important;
+
+  box-shadow:
+    0 1px 1px rgba(17,24,28,.03),
+    0 2px 6px rgba(17,24,28,.025);
+
+  transition:
+    border-color .14s ease,
+    box-shadow .14s ease,
+    transform .14s ease,
+    background .14s ease;
 }
 
-.sidebar .filter-chip {
-  background: #fbf7f0;
-  border-color: #dfd0bb;
+.filter-chip:hover{
+  background:#fff !important;
+  border-color:#c8d0d3 !important;
+
+  box-shadow:
+    0 1px 2px rgba(17,24,28,.04),
+    0 4px 10px rgba(17,24,28,.04);
 }
 
-.sidebar .filter-chip:hover {
-  background: #fffaf3;
-  border-color: #c9ad86;
+.filter-chip.active{
+  background:#fff !important;
+  border-color:#aeb9bd !important;
+  color:#263438 !important;
+
+  box-shadow:
+    0 0 0 1px rgba(41,76,83,.035),
+    0 3px 9px rgba(17,24,28,.045);
+
+  font-weight:650;
 }
 
-.sidebar .filter-chip.active {
-  background: #efe0ca;
-  border-color: #b58d5c;
+.filter-chip-count{
+  color:#8a9498 !important;
+  font-weight:650;
 }
 
-.sidebar .site-item {
-  background: #fffdf9;
-  border-color: #e1d5c5;
+.filter-chip-icon{
+  opacity:1 !important;
 }
 
-.sidebar .site-item:hover {
-  background: #fff8ee;
-  border-color: #cdb28e;
+/* Keep category identity only in the icon */
+.filter-chip.cat-heritage .filter-chip-icon{color:#9a7040 !important}
+.filter-chip.cat-religious .filter-chip-icon{color:#82495a !important}
+.filter-chip.cat-architecture .filter-chip-icon{color:#596971 !important}
+.filter-chip.cat-parks .filter-chip-icon{color:#5d7b47 !important}
+.filter-chip.cat-markets .filter-chip-icon{color:#a37632 !important}
+.filter-chip.cat-museums .filter-chip-icon{color:#6d6084 !important}
+.filter-chip.cat-family .filter-chip-icon{color:#447985 !important}
+.filter-chip.cat-food .filter-chip-icon{color:#a85d3c !important}
+
+/* No category tint backgrounds */
+.filter-chip.cat-heritage.active,
+.filter-chip.cat-religious.active,
+.filter-chip.cat-architecture.active,
+.filter-chip.cat-parks.active,
+.filter-chip.cat-markets.active,
+.filter-chip.cat-museums.active,
+.filter-chip.cat-family.active,
+.filter-chip.cat-food.active,
+.filter-chip.cat-default.active{
+  background:#fff !important;
 }
 
-.sidebar .site-item.active {
-  background: #f4e2ca;
-  border-color: #a97843;
+/* ===== Premium white category pills ===== */
+
+.filter-chip{
+  background:#fff !important;
+  border:1px solid #dde3e5 !important;
+  color:#344247 !important;
+
+  box-shadow:
+    0 1px 1px rgba(17,24,28,.03),
+    0 2px 6px rgba(17,24,28,.025);
+
+  transition:
+    border-color .14s ease,
+    box-shadow .14s ease,
+    transform .14s ease,
+    background .14s ease;
 }
 
-.sidebar .suggest-place-button {
-  background: #fffaf3;
-  border-color: #cdb28e;
+.filter-chip:hover{
+  background:#fff !important;
+  border-color:#c8d0d3 !important;
+
+  box-shadow:
+    0 1px 2px rgba(17,24,28,.04),
+    0 4px 10px rgba(17,24,28,.04);
 }
 
-.sidebar .suggest-place-button:hover {
-  background: #f3dfc4;
-  border-color: #aa7b49;
+.filter-chip.active{
+  background:#fff !important;
+  border-color:#aeb9bd !important;
+  color:#263438 !important;
+
+  box-shadow:
+    0 0 0 1px rgba(41,76,83,.035),
+    0 3px 9px rgba(17,24,28,.045);
+
+  font-weight:650;
 }
 
-
-/* ===== Lucknow Atlas sidebar palette ===== */
-
-.sidebar {
-  background: #f3eadc;
-  border-right-color: #d8c7ad;
+.filter-chip-count{
+  color:#8a9498 !important;
+  font-weight:650;
 }
 
-.sidebar .filter-chip {
-  background: #fbf7f0;
-  border-color: #dfd0bb;
+.filter-chip-icon{
+  opacity:1 !important;
 }
 
-.sidebar .filter-chip:hover {
-  background: #fffaf3;
-  border-color: #c9ad86;
+/* Keep category identity only in the icon */
+.filter-chip.cat-heritage .filter-chip-icon{color:#9a7040 !important}
+.filter-chip.cat-religious .filter-chip-icon{color:#82495a !important}
+.filter-chip.cat-architecture .filter-chip-icon{color:#596971 !important}
+.filter-chip.cat-parks .filter-chip-icon{color:#5d7b47 !important}
+.filter-chip.cat-markets .filter-chip-icon{color:#a37632 !important}
+.filter-chip.cat-museums .filter-chip-icon{color:#6d6084 !important}
+.filter-chip.cat-family .filter-chip-icon{color:#447985 !important}
+.filter-chip.cat-food .filter-chip-icon{color:#a85d3c !important}
+
+/* No category tint backgrounds */
+.filter-chip.cat-heritage.active,
+.filter-chip.cat-religious.active,
+.filter-chip.cat-architecture.active,
+.filter-chip.cat-parks.active,
+.filter-chip.cat-markets.active,
+.filter-chip.cat-museums.active,
+.filter-chip.cat-family.active,
+.filter-chip.cat-food.active,
+.filter-chip.cat-default.active{
+  background:#fff !important;
 }
 
-.sidebar .filter-chip.active {
-  background: #efe0ca;
-  border-color: #b58d5c;
+/* ============================================================
+   CATEGORY FILTERS — FLAT PREMIUM SIDEBAR
+   ============================================================ */
+
+.filter-list{
+  gap:0 !important;
+  padding:0 14px !important;
 }
 
-.sidebar .site-item {
-  background: #fffdf9;
-  border-color: #e1d5c5;
+.filter-chip{
+  position:relative !important;
+
+  min-height:43px !important;
+
+  display:grid !important;
+  grid-template-columns:22px minmax(0,1fr) auto !important;
+  align-items:center !important;
+  gap:11px !important;
+
+  padding:0 8px 0 11px !important;
+
+  background:#fff !important;
+
+  border:0 !important;
+  border-bottom:1px solid #edf0f1 !important;
+  border-radius:0 !important;
+
+  box-shadow:none !important;
+
+  color:#465257 !important;
+
+  font-size:12.5px !important;
+  font-weight:500 !important;
+
+  transform:none !important;
+
+  transition:
+    background .12s ease,
+    color .12s ease !important;
 }
 
-.sidebar .site-item:hover {
-  background: #fff8ee;
-  border-color: #cdb28e;
+.filter-chip:first-child{
+  border-top:1px solid #edf0f1 !important;
 }
 
-.sidebar .site-item.active {
-  background: #f4e2ca;
-  border-color: #a97843;
+.filter-chip:hover{
+  background:#f8f9f9 !important;
+  border-color:#edf0f1 !important;
+  box-shadow:none !important;
+  transform:none !important;
 }
 
-.sidebar .suggest-place-button {
-  background: #fffaf3;
-  border-color: #cdb28e;
+.filter-chip.active{
+  background:#fafafa !important;
+  color:#202b2f !important;
+
+  border-color:#e8ebec !important;
+
+  box-shadow:none !important;
+
+  font-weight:650 !important;
 }
 
-.sidebar .suggest-place-button:hover {
-  background: #f3dfc4;
-  border-color: #aa7b49;
+/* Brass active indicator */
+.filter-chip.active::after{
+  content:"";
+  position:absolute;
+
+  left:0;
+  top:8px;
+  bottom:8px;
+
+  width:3px;
+
+  border-radius:0 2px 2px 0;
+
+  background:#a47d3f;
 }
 
-
-/* ===== Lucknow Atlas sidebar palette ===== */
-
-.sidebar {
-  background: #f3eadc;
-  border-right-color: #d8c7ad;
+/* Ensure old decorative pseudo-icon never returns */
+.filter-chip::before{
+  display:none !important;
+  content:none !important;
 }
 
-.sidebar .filter-chip {
-  background: #fbf7f0;
-  border-color: #dfd0bb;
+/* Icon */
+.filter-chip-icon{
+  width:20px !important;
+  height:20px !important;
+
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+
+  opacity:.82 !important;
 }
 
-.sidebar .filter-chip:hover {
-  background: #fffaf3;
-  border-color: #c9ad86;
+.filter-chip.active .filter-chip-icon{
+  opacity:1 !important;
 }
 
-.sidebar .filter-chip.active {
-  background: #efe0ca;
-  border-color: #b58d5c;
+.filter-chip-icon svg{
+  width:20px !important;
+  height:20px !important;
+
+  display:block !important;
+
+  fill:none !important;
 }
 
-.sidebar .site-item {
-  background: #fffdf9;
-  border-color: #e1d5c5;
+/* Category identity remains only in the icon */
+.filter-chip.cat-heritage .filter-chip-icon{color:#956d3d !important}
+.filter-chip.cat-religious .filter-chip-icon{color:#80485a !important}
+.filter-chip.cat-architecture .filter-chip-icon{color:#596970 !important}
+.filter-chip.cat-parks .filter-chip-icon{color:#5b7845 !important}
+.filter-chip.cat-markets .filter-chip-icon{color:#9c7131 !important}
+.filter-chip.cat-museums .filter-chip-icon{color:#6c6081 !important}
+.filter-chip.cat-family .filter-chip-icon{color:#447782 !important}
+.filter-chip.cat-food .filter-chip-icon{color:#a25a3b !important}
+
+/* Text */
+.filter-chip-name{
+  min-width:0 !important;
+
+  overflow:hidden !important;
+  white-space:nowrap !important;
+  text-overflow:ellipsis !important;
 }
 
-.sidebar .site-item:hover {
-  background: #fff8ee;
-  border-color: #cdb28e;
+/* Count */
+.filter-chip-count{
+  min-width:20px !important;
+
+  color:#98a1a4 !important;
+
+  font-size:10px !important;
+  font-weight:600 !important;
+
+  text-align:right !important;
 }
 
-.sidebar .site-item.active {
-  background: #f4e2ca;
-  border-color: #a97843;
+.filter-chip.active .filter-chip-count{
+  color:#707b7f !important;
 }
 
-.sidebar .suggest-place-button {
-  background: #fffaf3;
-  border-color: #cdb28e;
+/* Mobile uses the exact same visual language */
+#filterDrawer .filter-list{
+  padding:0 !important;
 }
 
-.sidebar .suggest-place-button:hover {
-  background: #f3dfc4;
-  border-color: #aa7b49;
+#filterDrawer .filter-chip{
+  min-height:46px !important;
+  padding-left:12px !important;
+  padding-right:8px !important;
 }
 
+/* ============================================================
+   CATEGORY FILTERS — FLAT PREMIUM SIDEBAR
+   ============================================================ */
 
-/* ===== Lucknow Atlas sidebar palette ===== */
-
-.sidebar {
-  background: #f3eadc;
-  border-right-color: #d8c7ad;
+.filter-list{
+  gap:0 !important;
+  padding:0 14px !important;
 }
 
-.sidebar .filter-chip {
-  background: #fbf7f0;
-  border-color: #dfd0bb;
+.filter-chip{
+  position:relative !important;
+
+  min-height:43px !important;
+
+  display:grid !important;
+  grid-template-columns:22px minmax(0,1fr) auto !important;
+  align-items:center !important;
+  gap:11px !important;
+
+  padding:0 8px 0 11px !important;
+
+  background:#fff !important;
+
+  border:0 !important;
+  border-bottom:1px solid #edf0f1 !important;
+  border-radius:0 !important;
+
+  box-shadow:none !important;
+
+  color:#465257 !important;
+
+  font-size:12.5px !important;
+  font-weight:500 !important;
+
+  transform:none !important;
+
+  transition:
+    background .12s ease,
+    color .12s ease !important;
 }
 
-.sidebar .filter-chip:hover {
-  background: #fffaf3;
-  border-color: #c9ad86;
+.filter-chip:first-child{
+  border-top:1px solid #edf0f1 !important;
 }
 
-.sidebar .filter-chip.active {
-  background: #efe0ca;
-  border-color: #b58d5c;
+.filter-chip:hover{
+  background:#f8f9f9 !important;
+  border-color:#edf0f1 !important;
+  box-shadow:none !important;
+  transform:none !important;
 }
 
-.sidebar .site-item {
-  background: #fffdf9;
-  border-color: #e1d5c5;
+.filter-chip.active{
+  background:#fafafa !important;
+  color:#202b2f !important;
+
+  border-color:#e8ebec !important;
+
+  box-shadow:none !important;
+
+  font-weight:650 !important;
 }
 
-.sidebar .site-item:hover {
-  background: #fff8ee;
-  border-color: #cdb28e;
+/* Brass active indicator */
+.filter-chip.active::after{
+  content:"";
+  position:absolute;
+
+  left:0;
+  top:8px;
+  bottom:8px;
+
+  width:3px;
+
+  border-radius:0 2px 2px 0;
+
+  background:#a47d3f;
 }
 
-.sidebar .site-item.active {
-  background: #f4e2ca;
-  border-color: #a97843;
+/* Ensure old decorative pseudo-icon never returns */
+.filter-chip::before{
+  display:none !important;
+  content:none !important;
 }
 
-.sidebar .suggest-place-button {
-  background: #fffaf3;
-  border-color: #cdb28e;
+/* Icon */
+.filter-chip-icon{
+  width:20px !important;
+  height:20px !important;
+
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+
+  opacity:.82 !important;
 }
 
-.sidebar .suggest-place-button:hover {
-  background: #f3dfc4;
-  border-color: #aa7b49;
+.filter-chip.active .filter-chip-icon{
+  opacity:1 !important;
 }
 
-/* ===== Lucknow Atlas sidebar palette ===== */
+.filter-chip-icon svg{
+  width:20px !important;
+  height:20px !important;
 
-.sidebar {
-  background: #f3eadc;
-  border-right-color: #d8c7ad;
+  display:block !important;
+
+  fill:none !important;
 }
 
-.sidebar .filter-chip {
-  background: #fbf7f0;
-  border-color: #dfd0bb;
+/* Category identity remains only in the icon */
+.filter-chip.cat-heritage .filter-chip-icon{color:#956d3d !important}
+.filter-chip.cat-religious .filter-chip-icon{color:#80485a !important}
+.filter-chip.cat-architecture .filter-chip-icon{color:#596970 !important}
+.filter-chip.cat-parks .filter-chip-icon{color:#5b7845 !important}
+.filter-chip.cat-markets .filter-chip-icon{color:#9c7131 !important}
+.filter-chip.cat-museums .filter-chip-icon{color:#6c6081 !important}
+.filter-chip.cat-family .filter-chip-icon{color:#447782 !important}
+.filter-chip.cat-food .filter-chip-icon{color:#a25a3b !important}
+
+/* Text */
+.filter-chip-name{
+  min-width:0 !important;
+
+  overflow:hidden !important;
+  white-space:nowrap !important;
+  text-overflow:ellipsis !important;
 }
 
-.sidebar .filter-chip:hover {
-  background: #fffaf3;
-  border-color: #c9ad86;
+/* Count */
+.filter-chip-count{
+  min-width:20px !important;
+
+  color:#98a1a4 !important;
+
+  font-size:10px !important;
+  font-weight:600 !important;
+
+  text-align:right !important;
 }
 
-.sidebar .filter-chip.active {
-  background: #efe0ca;
-  border-color: #b58d5c;
+.filter-chip.active .filter-chip-count{
+  color:#707b7f !important;
 }
 
-.sidebar .site-item {
-  background: #fffdf9;
-  border-color: #e1d5c5;
+/* Mobile uses the exact same visual language */
+#filterDrawer .filter-list{
+  padding:0 !important;
 }
 
-.sidebar .site-item:hover {
-  background: #fff8ee;
-  border-color: #cdb28e;
+#filterDrawer .filter-chip{
+  min-height:46px !important;
+  padding-left:12px !important;
+  padding-right:8px !important;
 }
-
-.sidebar .site-item.active {
-  background: #f4e2ca;
-  border-color: #a97843;
-}
-
-.sidebar .suggest-place-button {
-  background: #fffaf3;
-  border-color: #cdb28e;
-}
-
-.sidebar .suggest-place-button:hover {
-  background: #f3dfc4;
-  border-color: #aa7b49;
-}
-

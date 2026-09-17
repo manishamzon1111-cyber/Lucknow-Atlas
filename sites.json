@@ -746,8 +746,8 @@
     "category": "Food",
     "period": "Lucknow Food",
     "year": "Est. 1905",
-    "lat": null,
-    "lng": null,
+    "lat": 26.8483125,
+    "lng": 80.9273125,
     "mapsQuery": "168/6, Old Nazirabad Rd, Mohan Market, Khayali Ganj, Aminabad, Lucknow, Uttar Pradesh 226018",
     "summary": "One of Lucknow's best-known kebab institutions, especially associated with galawati kebabs and parathas.",
     "foodType": [
@@ -764,8 +764,8 @@
     "category": "Food",
     "period": "Lucknow Food",
     "year": "Awadhi restaurant",
-    "lat": null,
-    "lng": null,
+    "lat": 26.8521875,
+    "lng": 80.9360625,
     "mapsQuery": "VW2P+VCF, Wala Qadar Rd, DM Compound Colony, Kaiserbagh Officer's Colony, Kaiser Bagh, Lucknow, Uttar Pradesh 226018",
     "summary": "A long-running Lucknow favourite for Mughlai and Awadhi dishes, especially chicken masala, kebabs and parathas.",
     "foodType": [
@@ -836,8 +836,8 @@
     "category": "Food",
     "period": "Lucknow Food",
     "year": "Street food",
-    "lat": null,
-    "lng": null,
+    "lat": 26.8480625,
+    "lng": 80.9403125,
     "mapsQuery": "RWXR+64Q, Naval Kishore Rd, Sushanpura, Lalbagh, Lucknow, Uttar Pradesh 226001",
     "summary": "A popular vegetarian chaat stop known for aloo tikki, matar chaat, dahi papdi and pani puri.",
     "foodType": [
@@ -854,8 +854,8 @@
     "category": "Food",
     "period": "Lucknow Food",
     "year": "Biryani shop",
-    "lat": null,
-    "lng": null,
+    "lat": 26.8481875,
+    "lng": 80.9273125,
     "mapsQuery": "Wahid Biryani, Aminabad, Lucknow, Uttar Pradesh 226018",
     "summary": "A longstanding Aminabad biryani shop associated with Lucknow-style biryani and Mughlai food.",
     "foodType": [
