@@ -713,12 +713,17 @@
     "summary": "A large modern memorial and museum complex in Lucknow featuring monumental statues, landscaped public space and exhibitions on twentieth-century Indian political and public life.",
     "commonsQuery": "Rashtra Prerna Sthal Lucknow",
     "images": [
-      "img/rashtra-prerna-sthal/1.jpg",
-      "img/rashtra-prerna-sthal/2.jpg",
-      "img/rashtra-prerna-sthal/3.jpg"
+      "img/rashtra-prerna-sthal/4.jpg",
+      "img/rashtra-prerna-sthal/5.jpg",
+      "img/rashtra-prerna-sthal/6.jpg",
+      "img/rashtra-prerna-sthal/7.jpg"
     ],
     "category": "Museums & Culture",
-    "cover": "img/rashtra-prerna-sthal/1.jpg"
+    "cover": "img/rashtra-prerna-sthal/4.jpg",
+    "markerImage": "img/rashtra-prerna-sthal/4.jpg",
+    "mapsQuery": "Rashtra Prerna Sthal, Lucknow, Uttar Pradesh, India",
+    "coordVerified": "high",
+    "coordSource": "https://www.google.com/maps/search/?api=1&query=Rashtra%20Prerna%20Sthal%20Lucknow"
   },
   {
     "id": "khatu-shyam-lucknow",
@@ -756,8 +761,16 @@
       "Mughlai"
     ],
     "area": "Aminabad",
-    "images": [],
-    "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Tunday%20Kababi%2C%20Aminabad&query_place_id=ChIJEfzCO7r9mzkRHFoXu7K_eCw"
+    "images": [
+      "img/tundkabaamin/1.jpg",
+      "img/tundkabaamin/2.jpg"
+    ],
+    "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Tunday%20Kababi%2C%20Aminabad&query_place_id=ChIJEfzCO7r9mzkRHFoXu7K_eCw",
+    "wiki": "",
+    "cover": "img/tundkabaamin/1.jpg",
+    "markerImage": "img/tundkabaamin/1.jpg",
+    "coordVerified": "low",
+    "coordSource": "https://www.google.com/maps?q=26.8483125,80.9273125"
   },
   {
     "id": "dastarkhwan-tulsi-theatre",
@@ -803,8 +816,17 @@
       "Awadhi"
     ],
     "area": "Chowk",
-    "images": [],
-    "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Raheem%27s%20Kulcha-Nahari&query_place_id=ChIJhSfNA-f9mzkRJoc6wjf5teA"
+    "images": [
+      "img/rahekulcnaha/1.jpg",
+      "img/rahekulcnaha/2.jpg",
+      "img/rahekulcnaha/3.jpg"
+    ],
+    "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Raheem%27s%20Kulcha-Nahari&query_place_id=ChIJhSfNA-f9mzkRJoc6wjf5teA",
+    "wiki": "",
+    "cover": "img/rahekulcnaha/1.jpg",
+    "markerImage": "img/rahekulcnaha/2.jpg",
+    "coordVerified": "low",
+    "coordSource": "https://www.google.com/maps?q=26.8665,80.9152"
   },
   {
     "id": "mubeens-chowk",
@@ -822,8 +844,18 @@
       "Mughlai"
     ],
     "area": "Chowk",
-    "images": [],
-    "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Mubeen%27s&query_place_id=ChIJNxi0Hef9mzkR9T4BxXVfpa4"
+    "images": [
+      "img/mubechow/1.jpg",
+      "img/mubechow/2.jpg",
+      "img/mubechow/3.jpg",
+      "img/mubechow/4.jpg"
+    ],
+    "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Mubeen%27s&query_place_id=ChIJNxi0Hef9mzkR9T4BxXVfpa4",
+    "wiki": "",
+    "cover": "img/mubechow/2.jpg",
+    "markerImage": "img/mubechow/1.jpg",
+    "coordVerified": "low",
+    "coordSource": "https://www.google.com/maps?q=26.85962,80.90619"
   },
   {
     "id": "open-air-restaurant",
@@ -869,8 +901,15 @@
       "Vegetarian"
     ],
     "area": "Lalbagh",
-    "images": [],
-    "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Jain%20Chaat%20Bhandar&query_place_id=ChIJiR-20qf9mzkRDULdICiNmAE"
+    "images": [
+      "img/jainchaabhan/1.jpg"
+    ],
+    "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Jain%20Chaat%20Bhandar&query_place_id=ChIJiR-20qf9mzkRDULdICiNmAE",
+    "wiki": "",
+    "cover": "img/jainchaabhan/1.jpg",
+    "markerImage": "img/jainchaabhan/1.jpg",
+    "coordVerified": "low",
+    "coordSource": "https://www.google.com/maps?q=26.8480625,80.9403125"
   },
   {
     "id": "wahid-biryani-aminabad",
@@ -888,8 +927,17 @@
       "Mughlai"
     ],
     "area": "Aminabad",
-    "images": [],
-    "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Wahid%20Biryani&query_place_id=ChIJZ5XuVrf9mzkR-743QMHHYzI"
+    "images": [
+      "img/wahibiryamin/1.jpg",
+      "img/wahibiryamin/2.jpg",
+      "img/wahibiryamin/3.jpg"
+    ],
+    "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Wahid%20Biryani&query_place_id=ChIJZ5XuVrf9mzkR-743QMHHYzI",
+    "wiki": "",
+    "cover": "img/wahibiryamin/3.jpg",
+    "markerImage": "img/wahibiryamin/3.jpg",
+    "coordVerified": "low",
+    "coordSource": "https://www.google.com/maps?q=26.8481875,80.9273125"
   },
   {
     "id": "durga-khasta-corner",
@@ -907,8 +955,18 @@
       "Street Food"
     ],
     "area": "Latouche Road",
-    "images": [],
-    "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Durga%20Khasta%20Corner&query_place_id=ChIJkVfHF7H9mzkRXLUDJWG6jCo"
+    "images": [
+      "img/durgkhascorn/1.jpg",
+      "img/durgkhascorn/2.jpg",
+      "img/durgkhascorn/3.jpg",
+      "img/durgkhascorn/4.jpg"
+    ],
+    "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Durga%20Khasta%20Corner&query_place_id=ChIJkVfHF7H9mzkRXLUDJWG6jCo",
+    "wiki": "",
+    "cover": "img/durgkhascorn/1.jpg",
+    "markerImage": "img/durgkhascorn/1.jpg",
+    "coordVerified": "high",
+    "coordSource": "https://www.google.com/maps/search/?api=1&query=Shri%20durga%20khasta%20corner"
   },
   {
     "id": "sakhawat-restaurant",

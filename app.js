@@ -863,3 +863,15 @@ async function init(){
 }
 
 init();
+
+
+/* Active map marker must always stay above overlapping markers */
+document.addEventListener("click", (e) => {
+  const marker = e.target.closest?.(".leaflet-marker-icon");
+  if (!marker) return;
+
+  document.querySelectorAll(".leaflet-marker-icon.atlas-active-pin")
+    .forEach(el => el.classList.remove("atlas-active-pin"));
+
+  marker.classList.add("atlas-active-pin");
+}, true);
