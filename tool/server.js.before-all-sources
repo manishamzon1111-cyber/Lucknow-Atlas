@@ -492,31 +492,16 @@ async function inspectImageCandidate(candidate) {
   }
 }
 
-async function inspectImageCandidates(candidates, onStatus = () => {}) {
+async function inspectImageCandidates(candidates) {
   const accepted = [];
   const queue = candidates.slice(0, 48);
-  const batches = Math.ceil(queue.length / 12);
-
   for (let index = 0; index < queue.length; index += 12) {
-    const batchNumber = Math.floor(index / 12) + 1;
-
-    onStatus(
-      `Checking image batch ${batchNumber}/${batches} · ${accepted.length} valid so far`,
-    );
-
     const batch = await Promise.all(
       queue.slice(index, index + 12).map(inspectImageCandidate),
     );
-
     accepted.push(...batch.filter(Boolean));
-
-    onStatus(
-      `Checked ${Math.min(index + 12, queue.length)}/${queue.length} candidates · ${accepted.length} valid`,
-    );
-
     if (accepted.length >= 20) break;
   }
-
   return accepted.slice(0, 20);
 }
 
@@ -524,10 +509,8 @@ async function cachedResearch(input) {
   const key = `research:${clean(input?.name).toLowerCase()}:${clean(input?.category).toLowerCase()}`;
   const cached = researchCache.get(key);
 
-  if (cached && Date.now() - cached.time < CACHE_TTL) {
-    onStatus(`Using cached results · ${cached.value.images?.length || 0} valid images`);
+  if (cached && Date.now() - cached.time < CACHE_TTL)
     return cached.value;
-  }
 
   const value = await research(input);
   researchCache.set(key, { time: Date.now(), value });
@@ -538,310 +521,48 @@ async function cachedResearch(input) {
   return value;
 }
 
-async function openverseImages(query) {
-  const url = new URL("https://api.openverse.org/v1/images/");
-  url.search = new URLSearchParams({
-    q: `${query} Lucknow`,
-    page_size: "40",
-    mature: "false",
-  });
-
-  const data = await getJson(url, { timeout: 9000 });
-
-  return (data.results || []).map((item) => ({
-    url: item.url,
-    pageUrl: item.foreign_landing_url || item.detail_url || "",
-    source: `Openverse${item.source ? ` · ${item.source}` : ""}`,
-    title: item.title || query,
-    width: Number(item.width) || 0,
-    height: Number(item.height) || 0,
-    license: item.license || "",
-    provider: "Openverse",
-  }));
-}
-
-async function duckDuckGoImages(query) {
-  const searchUrl =
-    `https://duckduckgo.com/?q=${encodeURIComponent(`${query} Lucknow`)}`;
-
-  const html = await (
-    await fetchOk(searchUrl, {
-      timeout: 8000,
-      headers: { Accept: "text/html" },
-    })
-  ).text();
-
-  const token =
-    html.match(/vqd=['"]([^'"]+)/i)?.[1] ||
-    html.match(/vqd=([\d-]+)/i)?.[1];
-
-  if (!token)
-    throw new Error("DuckDuckGo did not return an image-search token");
-
-  const url = new URL("https://duckduckgo.com/i.js");
-  url.search = new URLSearchParams({
-    q: `${query} Lucknow`,
-    vqd: token,
-    o: "json",
-    f: ",,,",
-    p: "1",
-    l: "in-en",
-  });
-
-  const data = await getJson(url, {
-    timeout: 10000,
-    headers: {
-      Accept: "application/json",
-      Referer: searchUrl,
-    },
-  });
-
-  return (data.results || []).slice(0, 50).map((item) => ({
-    url: item.image,
-    pageUrl: item.url,
-    source: item.source || "DuckDuckGo Images",
-    title: item.title || query,
-    width: Number(item.width) || 0,
-    height: Number(item.height) || 0,
-    provider: "DuckDuckGo",
-  }));
-}
-
-async function bingImages(query) {
-  const url = new URL("https://www.bing.com/images/search");
-  url.search = new URLSearchParams({
-    q: `${query} Lucknow`,
-    form: "HDRSC2",
-    first: "1",
-    count: "50",
-    qft: "+filterui:imagesize-large",
-  });
-
-  const html = await (
-    await fetchOk(url, {
-      timeout: 9000,
-      headers: { Accept: "text/html" },
-    })
-  ).text();
-
-  const results = [];
-
-  for (const match of html.matchAll(/\sm="([^"]+)"/g)) {
-    try {
-      const item = JSON.parse(decodeHtml(match[1]));
-
-      if (!item.murl) continue;
-
-      results.push({
-        url: item.murl,
-        pageUrl: item.purl || "",
-        source: item.turl
-          ? new URL(item.turl).hostname.replace(/^www\./, "")
-          : "Bing Images",
-        title: item.t || query,
-        width: Number(item.mw) || 0,
-        height: Number(item.mh) || 0,
-        provider: "Bing",
-      });
-    } catch {
-      // Ignore malformed Bing result blocks.
-    }
-  }
-
-  return results.slice(0, 50);
-}
-
-function decodeGoogleValue(value) {
-  return value
-    .replace(/\\u003d/g, "=")
-    .replace(/\\u0026/g, "&")
-    .replace(/\\u003f/g, "?")
-    .replace(/\\\//g, "/")
-    .replace(/\\\\/g, "\\");
-}
-
-async function googleHtmlImages(query) {
-  const url = new URL("https://www.google.com/search");
-  url.search = new URLSearchParams({
-    q: `${query} Lucknow`,
-    tbm: "isch",
-    hl: "en",
-    gl: "in",
-    safe: "active",
-  });
-
-  const html = await (
-    await fetchOk(url, {
-      timeout: 9000,
-      headers: {
-        Accept: "text/html",
-        "Accept-Language": "en-IN,en;q=0.9",
-      },
-    })
-  ).text();
-
-  const results = [];
-  const seen = new Set();
-
-  for (const match of html.matchAll(
-    /\["(https?:\\?\/\\?\/[^"]+\.(?:jpe?g|png|webp)(?:\?[^"]*)?)",(\d+),(\d+)\]/gi,
-  )) {
-    const imageUrl = decodeGoogleValue(match[1]);
-
-    if (
-      seen.has(imageUrl) ||
-      /gstatic\.com|googleusercontent\.com\/.*(?:logo|favicon)/i.test(imageUrl)
-    )
-      continue;
-
-    seen.add(imageUrl);
-
-    results.push({
-      url: imageUrl,
-      pageUrl: url.href,
-      source: "Google Images HTML fallback",
-      title: query,
-      width: Number(match[2]) || 0,
-      height: Number(match[3]) || 0,
-      provider: "Google HTML",
-    });
-  }
-
-  return results.slice(0, 40);
-}
-
-function interleaveImageSources(groups) {
-  const output = [];
-  const longest = Math.max(0, ...groups.map((group) => group.length));
-
-  for (let index = 0; index < longest; index++) {
-    for (const group of groups) {
-      if (group[index]) output.push(group[index]);
-    }
-  }
-
-  return output;
-}
-
-async function researchImages({ name }, onStatus = () => {}) {
+async function researchImages({ name }) {
   name = clean(name);
 
   if (!name || name.length > 120)
     throw new Error("Enter a valid place name");
 
-  const key = `images-all:${name.toLowerCase()}`;
+  const key = `images:${name.toLowerCase()}`;
   const cached = researchCache.get(key);
 
   if (cached && Date.now() - cached.time < CACHE_TTL)
     return cached.value;
 
   const config = await readConfig();
-
-  onStatus(
-    "Searching Google, webpages, Wikimedia, Openverse, DuckDuckGo and Bing…",
-  );
-
   const settled = await Promise.allSettled([
-    officialSearch(name, config, true),
-    officialSearch(name, config, false),
     commonsImages(name),
-    openverseImages(name),
-    duckDuckGoImages(name),
-    bingImages(name),
-    googleHtmlImages(name),
+    officialSearch(name, config, true),
   ]);
 
-  const result = (index, fallback) =>
-    settled[index]?.status === "fulfilled"
-      ? settled[index].value
-      : fallback;
+  const commons =
+    settled[0].status === "fulfilled" ? settled[0].value : [];
 
-  const googlePack = result(0, {
-    results: [],
-    warnings: ["Google image search failed."],
-  });
+  const searchPack =
+    settled[1].status === "fulfilled"
+      ? settled[1].value
+      : { results: [], warnings: ["Image search failed."] };
 
-  const webPack = result(1, {
-    results: [],
-    warnings: ["Google web search failed."],
-  });
-
-  const commons = result(2, []);
-  const openverse = result(3, []);
-  const duck = result(4, []);
-  const bing = result(5, []);
-  const googleHtml = result(6, []);
-
-  const webpageImages = (
-    await Promise.all(
-      (webPack.results || []).slice(0, 12).map(pageImage),
-    )
-  ).filter(Boolean);
-
-  const groups = [
-    googlePack.results || [],
-    webpageImages,
-    commons,
-    openverse,
-    duck,
-    bing,
-    googleHtml,
-  ].map((group) =>
-    group.filter((image) =>
-      entityMatches(
-        name,
-        `${image.title || ""} ${image.pageUrl || ""}`,
-      ),
+  const candidates = uniqImages([
+    ...(searchPack.results || []),
+    ...commons,
+  ]).filter((image) =>
+    entityMatches(
+      name,
+      `${image.title || ""} ${image.pageUrl || ""}`,
     ),
   );
 
-  const candidates = uniqImages(
-    interleaveImageSources(groups),
-  ).slice(0, 120);
-
-  onStatus(
-    `Sources finished · ${candidates.length} unique candidates · validating files…`,
-  );
-
-  const images = await inspectImageCandidates(candidates, onStatus);
-
-  onStatus(`Finished · ${images.length} valid images found`);
-
-  const warnings = [
-    ...(googlePack.warnings || []),
-    ...(webPack.warnings || []),
-  ];
-
-  const providerNames = [
-    "Google Images via Serper",
-    "Relevant webpages",
-    "Wikimedia Commons",
-    "Openverse",
-    "DuckDuckGo",
-    "Bing",
-    "Google HTML fallback",
-  ];
-
-  settled.forEach((item, index) => {
-    if (item.status === "rejected")
-      warnings.push(
-        `${providerNames[index]} failed: ${item.reason?.message || "unknown error"}`,
-      );
-  });
-
   const value = {
-    images,
-    warnings: [...new Set(warnings)],
-    providers: groups.map((group, index) => ({
-      name: providerNames[index],
-      candidates: group.length,
-    })),
+    images: await inspectImageCandidates(candidates),
+    warnings: searchPack.warnings || [],
   };
 
-  researchCache.set(key, {
-    time: Date.now(),
-    value,
-  });
+  researchCache.set(key, { time: Date.now(), value });
 
   if (researchCache.size > 30)
     researchCache.delete(researchCache.keys().next().value);
@@ -1456,33 +1177,6 @@ app.get("/api/publish/status", async (_req, res) => {
 app.post("/api/publish", async (req, res) => {
   try { res.json(await publish(req.body || {})); }
   catch (error) { res.status(400).json({ error: error.message }); }
-});
-
-app.get("/api/images/stream", async (req, res) => {
-  res.setHeader("Content-Type", "text/event-stream");
-  res.setHeader("Cache-Control", "no-cache, no-transform");
-  res.setHeader("Connection", "keep-alive");
-  res.flushHeaders();
-
-  const send = (type, data) => {
-    res.write(`event: ${type}\n`);
-    res.write(`data: ${JSON.stringify(data)}\n\n`);
-  };
-
-  try {
-    const result = await researchImages(
-      { name: req.query.name },
-      (message) => send("status", { message }),
-    );
-
-    send("result", result);
-  } catch (error) {
-    send("failure", {
-      error: error.message || "Image search failed",
-    });
-  } finally {
-    res.end();
-  }
 });
 
 app.post("/api/images", async (req, res) => {

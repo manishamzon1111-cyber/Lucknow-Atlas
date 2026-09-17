@@ -63,13 +63,16 @@
       "img/chota/3.jpg",
       "img/chota/4.jpg",
       "img/chota/5.jpg",
-      "img/chota/6.jpg"
+      "img/chota/6.jpg",
+      "img/chota/7.jpg",
+      "img/chota/8.jpg"
     ],
     "category": "Heritage",
-    "cover": "img/chota/3.jpg",
+    "cover": "img/chota/4.jpg",
     "mapsQuery": "Chota Imambara, Husainabad, Lucknow, Uttar Pradesh, India",
     "coordVerified": "high",
-    "coordSource": "https://mapcarta.com/W214212792"
+    "coordSource": "https://mapcarta.com/W214212792",
+    "markerImage": "img/chota/3.jpg"
   },
   {
     "id": "satkhanda",
@@ -736,5 +739,167 @@
     "mapsQuery": "Khatu Shyam Park, Hazratganj, Lucknow, Uttar Pradesh, India",
     "coordVerified": "high",
     "coordSource": "https://www.google.com/maps/search/?api=1&query=Shri%20Khatu%20Shyam%20Ji%20Temple%2C%20Lucknow"
+  },
+  {
+    "id": "tunday-kababi-aminabad",
+    "name": "Tunday Kababi — Aminabad",
+    "category": "Food",
+    "period": "Lucknow Food",
+    "year": "Est. 1905",
+    "lat": null,
+    "lng": null,
+    "mapsQuery": "168/6, Old Nazirabad Rd, Mohan Market, Khayali Ganj, Aminabad, Lucknow, Uttar Pradesh 226018",
+    "summary": "One of Lucknow's best-known kebab institutions, especially associated with galawati kebabs and parathas.",
+    "foodType": [
+      "Kebabs",
+      "Awadhi",
+      "Mughlai"
+    ],
+    "area": "Aminabad",
+    "images": []
+  },
+  {
+    "id": "dastarkhwan-tulsi-theatre",
+    "name": "Dastarkhwan — Tulsi Theatre",
+    "category": "Food",
+    "period": "Lucknow Food",
+    "year": "Awadhi restaurant",
+    "lat": null,
+    "lng": null,
+    "mapsQuery": "VW2P+VCF, Wala Qadar Rd, DM Compound Colony, Kaiserbagh Officer's Colony, Kaiser Bagh, Lucknow, Uttar Pradesh 226018",
+    "summary": "A long-running Lucknow favourite for Mughlai and Awadhi dishes, especially chicken masala, kebabs and parathas.",
+    "foodType": [
+      "Awadhi",
+      "Mughlai",
+      "Kebabs"
+    ],
+    "area": "Kaiserbagh",
+    "images": []
+  },
+  {
+    "id": "raheems-kulcha-nahari",
+    "name": "Raheem's Kulcha-Nahari",
+    "category": "Food",
+    "period": "Lucknow Food",
+    "year": "Historic eatery",
+    "lat": null,
+    "lng": null,
+    "mapsQuery": "Akbari Gate, Shahganj, Lucknow, Uttar Pradesh 226003",
+    "summary": "A classic old-Lucknow stop known above all for nahari served with crisp kulcha.",
+    "foodType": [
+      "Nahari",
+      "Kulcha",
+      "Awadhi"
+    ],
+    "area": "Chowk",
+    "images": []
+  },
+  {
+    "id": "mubeens-chowk",
+    "name": "Mubeen's",
+    "category": "Food",
+    "period": "Lucknow Food",
+    "year": "Traditional Mughlai restaurant",
+    "lat": 26.85962,
+    "lng": 80.90619,
+    "mapsQuery": "Opposite Ek Minara Masjid, Akbari Gate, Chowk, Lucknow, Uttar Pradesh 226003",
+    "summary": "A well-known Chowk restaurant associated with kulcha, nihari and traditional Mughlai dishes.",
+    "foodType": [
+      "Nihari",
+      "Kulcha",
+      "Mughlai"
+    ],
+    "area": "Chowk",
+    "images": []
+  },
+  {
+    "id": "open-air-restaurant",
+    "name": "Open Air Restaurant",
+    "category": "Food",
+    "period": "Lucknow Food",
+    "year": "Mughlai restaurant",
+    "lat": null,
+    "lng": null,
+    "mapsQuery": "Osama Talha Rd, Near Tulsi Theatre, DM Compound Colony, Kaiserbagh Officer's Colony, Hazratganj, Lucknow, Uttar Pradesh 226001",
+    "summary": "A popular Mughlai restaurant near Tulsi Theatre, frequently recommended for chicken masala and kebabs.",
+    "foodType": [
+      "Chicken",
+      "Kebabs",
+      "Mughlai"
+    ],
+    "area": "Kaiserbagh",
+    "images": []
+  },
+  {
+    "id": "jain-chaat-bhandar",
+    "name": "Jain Chaat Bhandar",
+    "category": "Food",
+    "period": "Lucknow Food",
+    "year": "Street food",
+    "lat": null,
+    "lng": null,
+    "mapsQuery": "RWXR+64Q, Naval Kishore Rd, Sushanpura, Lalbagh, Lucknow, Uttar Pradesh 226001",
+    "summary": "A popular vegetarian chaat stop known for aloo tikki, matar chaat, dahi papdi and pani puri.",
+    "foodType": [
+      "Chaat",
+      "Street Food",
+      "Vegetarian"
+    ],
+    "area": "Lalbagh",
+    "images": []
+  },
+  {
+    "id": "wahid-biryani-aminabad",
+    "name": "Wahid Biryani — Aminabad",
+    "category": "Food",
+    "period": "Lucknow Food",
+    "year": "Biryani shop",
+    "lat": null,
+    "lng": null,
+    "mapsQuery": "Wahid Biryani, Aminabad, Lucknow, Uttar Pradesh 226018",
+    "summary": "A longstanding Aminabad biryani shop associated with Lucknow-style biryani and Mughlai food.",
+    "foodType": [
+      "Biryani",
+      "Awadhi",
+      "Mughlai"
+    ],
+    "area": "Aminabad",
+    "images": []
+  },
+  {
+    "id": "durga-khasta-corner",
+    "name": "Durga Khasta Corner",
+    "category": "Food",
+    "period": "Lucknow Food",
+    "year": "Breakfast shop",
+    "lat": null,
+    "lng": null,
+    "mapsQuery": "Durga Khasta Corner, Latouche Road, Lucknow, Uttar Pradesh",
+    "summary": "A well-known breakfast stop for khasta, kachori and traditional morning snacks.",
+    "foodType": [
+      "Khasta",
+      "Breakfast",
+      "Street Food"
+    ],
+    "area": "Latouche Road",
+    "images": []
+  },
+  {
+    "id": "sakhawat-restaurant",
+    "name": "Sakhawat Restaurant",
+    "category": "Food",
+    "period": "Lucknow Food",
+    "year": "Traditional restaurant",
+    "lat": null,
+    "lng": null,
+    "mapsQuery": "2, Behind Oudh Gymkhana Club, Kaiserbagh, Lucknow, Uttar Pradesh 226018",
+    "summary": "An old-school Lucknow restaurant known for kebabs, biryani and traditional meat dishes.",
+    "foodType": [
+      "Kebabs",
+      "Biryani",
+      "Awadhi"
+    ],
+    "area": "Kaiserbagh",
+    "images": []
   }
 ]

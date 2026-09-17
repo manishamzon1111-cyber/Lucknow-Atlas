@@ -338,7 +338,7 @@ function renderEditPhotos() {
 }
 function ensureMorePhotoUI() {
   if ($("#findMorePhotos")) return;
-  $("#editPhotos").insertAdjacentHTML("afterend", `<div class="subhead"><div><h3>Add more photos</h3><p>Searches and validates images at least 1200×700.</p><div id="imageSearchStatus" class="image-search-status hidden" aria-live="polite"></div></div><button id="findMorePhotos" type="button" class="secondary">Find more photos</button></div><div id="editCandidates" class="photos"></div>`);
+  $("#editPhotos").insertAdjacentHTML("afterend", `<div class="subhead"><div><h3>Add more photos</h3><p>Searches and validates images at least 1200×700.</p></div><button id="findMorePhotos" type="button" class="secondary">Find more photos</button></div><div id="editCandidates" class="photos"></div>`);
   $("#findMorePhotos").onclick = findMorePhotos;
 }
 function renderEditCandidates() {
@@ -349,65 +349,15 @@ function renderEditCandidates() {
 }
 async function findMorePhotos() {
   const button = $("#findMorePhotos");
-  const status = $("#imageSearchStatus");
-
   button.disabled = true;
-  button.textContent = "Starting…";
-  status.textContent = "Starting image search…";
-  status.classList.remove("hidden", "error");
-
-  const stream = new EventSource(
-    `/api/images/stream?name=${encodeURIComponent(editingSite.name)}`,
-  );
-
-  let completed = false;
-
-  const finish = () => {
-    stream.close();
-    button.disabled = false;
-    button.textContent = "Find more photos";
-  };
-
-  stream.addEventListener("status", (event) => {
-    const data = JSON.parse(event.data);
-    status.textContent = data.message;
-    button.textContent = "Checking…";
-  });
-
-  stream.addEventListener("result", (event) => {
-    completed = true;
-    const data = JSON.parse(event.data);
-
+  button.textContent = "Searching…";
+  try {
+    const data = await api("/api/images", { method: "POST", body: JSON.stringify({ name: editingSite.name }) });
     editCandidates = data.images || [];
     renderEditCandidates();
-
-    status.textContent =
-      `${editCandidates.length} valid image${editCandidates.length === 1 ? "" : "s"} found`;
-
-    if (!editCandidates.length)
-      status.textContent =
-        "No candidate passed the relevance, size and download checks.";
-
-    finish();
-  });
-
-  stream.addEventListener("failure", (event) => {
-    completed = true;
-    const data = JSON.parse(event.data);
-
-    status.textContent = data.error || "Image search failed.";
-    status.classList.add("error");
-    finish();
-  });
-
-  stream.onerror = () => {
-    if (completed) return;
-
-    status.textContent =
-      "The image-search connection stopped unexpectedly.";
-    status.classList.add("error");
-    finish();
-  };
+    if (!editCandidates.length) toast("No additional verified images were found.", true);
+  } catch (error) { toast(error.message, true); }
+  finally { button.disabled = false; button.textContent = "Find more photos"; }
 }
 async function fillMissingEditDetails(siteId) {
   const form = $("#editForm");

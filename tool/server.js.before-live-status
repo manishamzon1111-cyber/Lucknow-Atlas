@@ -492,42 +492,25 @@ async function inspectImageCandidate(candidate) {
   }
 }
 
-async function inspectImageCandidates(candidates, onStatus = () => {}) {
+async function inspectImageCandidates(candidates) {
   const accepted = [];
-  const queue = candidates.slice(0, 48);
-  const batches = Math.ceil(queue.length / 12);
-
+  const queue = candidates.slice(0, 120);
   for (let index = 0; index < queue.length; index += 12) {
-    const batchNumber = Math.floor(index / 12) + 1;
-
-    onStatus(
-      `Checking image batch ${batchNumber}/${batches} · ${accepted.length} valid so far`,
-    );
-
     const batch = await Promise.all(
       queue.slice(index, index + 12).map(inspectImageCandidate),
     );
-
     accepted.push(...batch.filter(Boolean));
-
-    onStatus(
-      `Checked ${Math.min(index + 12, queue.length)}/${queue.length} candidates · ${accepted.length} valid`,
-    );
-
-    if (accepted.length >= 20) break;
+    if (accepted.length >= 30) break;
   }
-
-  return accepted.slice(0, 20);
+  return accepted.slice(0, 30);
 }
 
 async function cachedResearch(input) {
   const key = `research:${clean(input?.name).toLowerCase()}:${clean(input?.category).toLowerCase()}`;
   const cached = researchCache.get(key);
 
-  if (cached && Date.now() - cached.time < CACHE_TTL) {
-    onStatus(`Using cached results · ${cached.value.images?.length || 0} valid images`);
+  if (cached && Date.now() - cached.time < CACHE_TTL)
     return cached.value;
-  }
 
   const value = await research(input);
   researchCache.set(key, { time: Date.now(), value });
@@ -723,7 +706,7 @@ function interleaveImageSources(groups) {
   return output;
 }
 
-async function researchImages({ name }, onStatus = () => {}) {
+async function researchImages({ name }) {
   name = clean(name);
 
   if (!name || name.length > 120)
@@ -736,10 +719,6 @@ async function researchImages({ name }, onStatus = () => {}) {
     return cached.value;
 
   const config = await readConfig();
-
-  onStatus(
-    "Searching Google, webpages, Wikimedia, Openverse, DuckDuckGo and Bing…",
-  );
 
   const settled = await Promise.allSettled([
     officialSearch(name, config, true),
@@ -799,13 +778,7 @@ async function researchImages({ name }, onStatus = () => {}) {
     interleaveImageSources(groups),
   ).slice(0, 120);
 
-  onStatus(
-    `Sources finished · ${candidates.length} unique candidates · validating files…`,
-  );
-
-  const images = await inspectImageCandidates(candidates, onStatus);
-
-  onStatus(`Finished · ${images.length} valid images found`);
+  const images = await inspectImageCandidates(candidates);
 
   const warnings = [
     ...(googlePack.warnings || []),
@@ -1456,33 +1429,6 @@ app.get("/api/publish/status", async (_req, res) => {
 app.post("/api/publish", async (req, res) => {
   try { res.json(await publish(req.body || {})); }
   catch (error) { res.status(400).json({ error: error.message }); }
-});
-
-app.get("/api/images/stream", async (req, res) => {
-  res.setHeader("Content-Type", "text/event-stream");
-  res.setHeader("Cache-Control", "no-cache, no-transform");
-  res.setHeader("Connection", "keep-alive");
-  res.flushHeaders();
-
-  const send = (type, data) => {
-    res.write(`event: ${type}\n`);
-    res.write(`data: ${JSON.stringify(data)}\n\n`);
-  };
-
-  try {
-    const result = await researchImages(
-      { name: req.query.name },
-      (message) => send("status", { message }),
-    );
-
-    send("result", result);
-  } catch (error) {
-    send("failure", {
-      error: error.message || "Image search failed",
-    });
-  } finally {
-    res.end();
-  }
 });
 
 app.post("/api/images", async (req, res) => {
