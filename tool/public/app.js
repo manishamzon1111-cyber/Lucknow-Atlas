@@ -596,12 +596,25 @@ $("#saveSite").onclick = async () => {
     toast(`${saved.entry.name} updated. Backup: ${saved.backup}`); $("#siteEditor").classList.add("hidden"); await Promise.all([loadSites(), loadStatus()]);
   } catch (error) { toast(error.message, true); }
 };
+function describeChangedPath(rawLine) {
+  const filePath = rawLine.slice(3).trim().split(" -> ").pop();
+  if (filePath === "sites.json") return "Place data (sites.json)";
+  const imgMatch = filePath.match(/^img\/([^/]+)\//);
+  if (imgMatch) {
+    const folder = imgMatch[1];
+    const site = allSites.find((s) =>
+      (s.images || []).some((img) => img.startsWith(`img/${folder}/`)),
+    );
+    if (site) return `${site.name} — ${filePath.split("/").pop()}`;
+  }
+  return filePath;
+}
 async function checkPublish() {
   const state = await api("/api/publish/status");
   const lines = state.status ? state.status.split("\n").filter(Boolean) : [];
   $("#publishState").innerHTML = lines.length
     ? `<strong>${state.branch}: ${lines.length} changed path(s)</strong><ul class="publish-diff">${lines
-        .map((line) => `<li><code>${escapeHtml(line)}</code></li>`)
+        .map((line) => `<li><code>${line.slice(0, 2).trim()}</code> ${escapeHtml(describeChangedPath(line))}</li>`)
         .join("")}</ul>`
     : `${escapeHtml(state.branch)}: no unpublished changes`;
   return state;

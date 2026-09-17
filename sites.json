@@ -841,8 +841,17 @@
       "Mughlai"
     ],
     "area": "Kaiserbagh",
-    "images": [],
-    "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Open%20Air%20Restaurant&query_place_id=ChIJhZncBqT9mzkR51y0HPpXE4k"
+    "images": [
+      "img/openairrest/1.jpg",
+      "img/openairrest/2.jpg",
+      "img/openairrest/3.jpg"
+    ],
+    "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Open%20Air%20Restaurant&query_place_id=ChIJhZncBqT9mzkR51y0HPpXE4k",
+    "wiki": "",
+    "cover": "img/openairrest/3.jpg",
+    "markerImage": "img/openairrest/3.jpg",
+    "coordVerified": "low",
+    "coordSource": "https://www.google.com/maps?q=26.852187,80.936062"
   },
   {
     "id": "jain-chaat-bhandar",
