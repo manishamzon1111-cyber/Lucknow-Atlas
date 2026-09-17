@@ -4,11 +4,6 @@ let activeIssue = null;
 let allSites = [];
 let editingSite = null;
 let editCandidates = [];
-// "old:img/foo/1.jpg" or "new:2" — held in state so reordering or re-rendering
-// the photo lists cannot silently reset the choice.
-let editCoverRef = "";
-let editMarkerRef = "";
-let editAutofilling = false;
 
 const fields = [
   ["name", "Name", "wide"],
@@ -30,29 +25,6 @@ function toast(message, error = false) {
   el.textContent = message;
   el.className = `toast${error ? " error" : ""}`;
   setTimeout(() => el.classList.add("hidden"), 6000);
-}
-$("#toast").onclick = () => {
-  if (toastTimer) clearTimeout(toastTimer);
-  toastTimer = null;
-  $("#toast").classList.add("hidden");
-};
-
-// Wraps an async click handler so a button cannot be fired twice while it runs.
-function busy(button, label, action) {
-  return async (...args) => {
-    if (!button || button.disabled) return;
-    const original = button.textContent;
-    button.disabled = true;
-    button.textContent = label;
-    try {
-      return await action(...args);
-    } catch (error) {
-      toast(error.message, true);
-    } finally {
-      button.disabled = false;
-      button.textContent = original;
-    }
-  };
 }
 async function api(url, options = {}) {
   const response = await fetch(url, {
@@ -127,11 +99,7 @@ function updateCount() {
   const selected = [
     ...document.querySelectorAll('.photo input[type="checkbox"]:checked'),
   ];
-  $("#photoCount").textContent =
-    selected.length > 8
-      ? `${selected.length} selected · max 8`
-      : `${selected.length} of 8 selected`;
-  $("#photoCount").classList.toggle("pill-warn", selected.length > 8);
+  $("#photoCount").textContent = `${selected.length} selected`;
   document
     .querySelectorAll(".photo")
     .forEach((card) =>
@@ -150,7 +118,6 @@ function updateCount() {
   for (const name of ["cover", "marker"])
     if (selected.length && !checkedRadios.some((r) => r.name === name && r.checked && !r.disabled))
       selected[0].closest(".photo").querySelector(`input[name="${name}"]`).checked = true;
-  updateAddState();
 }
 function renderPhotos(images) {
   $("#photos").innerHTML = images
@@ -195,20 +162,12 @@ function renderCoordinates(consensus) {
 function updateAddState() {
   const verified = Boolean(result?.coordinateConsensus?.verified);
   const confirmed = Boolean($("#coordinateConfirmed")?.checked);
-  const count = document.querySelectorAll(
-    '#photos input[type="checkbox"]:checked',
-  ).length;
-  const photosOk = count >= 1 && count <= 8;
-  $("#addBtn").disabled = !(verified && confirmed && photosOk);
+  $("#addBtn").disabled = !(verified && confirmed);
   $("#saveNote").textContent = !verified
     ? "Adding is blocked until two coordinate sources agree."
-    : !confirmed
-      ? "Inspect the map and confirm its marker before adding."
-      : count === 0
-        ? "Select at least one photo."
-        : count > 8
-          ? `${count} photos selected. Remove ${count - 8} to get down to 8.`
-          : "Coordinates confirmed. Review the remaining details and photos.";
+    : confirmed
+      ? "Coordinates confirmed. Review the remaining details and photos."
+      : "Inspect the map and confirm its marker before adding.";
 }
 
 async function runResearch(input, button) {
@@ -366,9 +325,10 @@ async function loadSites() {
   siteOptions();
 }
 function renderEditPhotos() {
-  $("#editPhotos").innerHTML = editingSite.imageDetails.map((image, index) => `<article class="photo edit-photo" data-index="${index}"><img src="/${escapeHtml(image.path)}" alt=""><div class="photo-body"><div class="photo-meta">${image.width}×${image.height}${image.missing ? " · missing" : ""}</div><div class="move-buttons"><button type="button" class="secondary" data-move="up">↑</button><button type="button" class="secondary" data-move="down">↓</button></div><div class="image-roles"><label><input type="radio" name="editCover" value="old:${escapeHtml(image.path)}" ${editCoverRef === `old:${image.path}` ? "checked" : ""}> Gallery cover</label><label><input type="radio" name="editMarker" value="old:${escapeHtml(image.path)}" ${editMarkerRef === `old:${image.path}` ? "checked" : ""}> Map pin</label></div><label class="remove-photo"><input type="checkbox"> Remove</label></div></article>`).join("");
-  trackRoleRadios($("#editPhotos"));
+  $("#editPhotos").innerHTML = editingSite.imageDetails.map((image, index) => `<article class="photo edit-photo" data-index="${index}"><img src="/${escapeHtml(image.path)}" alt=""><div class="photo-body"><div class="photo-meta">${image.width}×${image.height}${image.missing ? " · missing" : ""}</div><div class="move-buttons"><button type="button" class="secondary" data-move="up">↑</button><button type="button" class="secondary" data-move="down">↓</button></div><div class="image-roles"><label><input type="radio" name="editCover" value="old:${escapeHtml(image.path)}" ${editingSite.cover === image.path ? "checked" : ""}> Gallery cover</label><label><input type="radio" name="editMarker" value="old:${escapeHtml(image.path)}" ${(editingSite.markerImage || editingSite.cover) === image.path ? "checked" : ""}> Map pin</label></div><label class="remove-photo"><input type="checkbox"> Remove</label></div></article>`).join("");
   $("#editPhotos").querySelectorAll("[data-move]").forEach((button) => button.onclick = () => {
+    editingSite.cover = $("#editPhotos input[name=editCover]:checked")?.value?.replace(/^old:/, "") || editingSite.cover;
+    editingSite.markerImage = $("#editPhotos input[name=editMarker]:checked")?.value?.replace(/^old:/, "") || editingSite.markerImage;
     const from = Number(button.closest(".edit-photo").dataset.index);
     const to = button.dataset.move === "up" ? from - 1 : from + 1;
     if (to < 0 || to >= editingSite.imageDetails.length) return;
@@ -382,20 +342,10 @@ function ensureMorePhotoUI() {
   $("#findMorePhotos").onclick = findMorePhotos;
 }
 function renderEditCandidates() {
-  $("#editCandidates").innerHTML = editCandidates.map((image, index) => `<article class="photo new-photo"><img src="${escapeHtml(image.url)}" alt="" loading="lazy" referrerpolicy="no-referrer"><div class="photo-body"><div class="photo-title">${escapeHtml(image.title || "Photo candidate")}</div><div class="photo-meta">${escapeHtml(image.source || "Source")} · ${image.width}×${image.height}</div><label><input type="checkbox" data-new="${index}"> Add photo</label><div class="image-roles"><label><input type="radio" name="editCover" value="new:${index}" ${editCoverRef === `new:${index}` ? "checked" : ""}> Gallery cover</label><label><input type="radio" name="editMarker" value="new:${index}" ${editMarkerRef === `new:${index}` ? "checked" : ""}> Map pin</label></div></div></article>`).join("");
-  trackRoleRadios($("#editCandidates"));
-  $("#editCandidates").querySelectorAll("input[type=radio]").forEach((radio) => radio.addEventListener("change", () => {
+  $("#editCandidates").innerHTML = editCandidates.map((image, index) => `<article class="photo new-photo"><img src="${escapeHtml(image.url)}" alt="" loading="lazy" referrerpolicy="no-referrer"><div class="photo-body"><div class="photo-title">${escapeHtml(image.title || "Photo candidate")}</div><div class="photo-meta">${escapeHtml(image.source || "Source")} · ${image.width}×${image.height}</div><label><input type="checkbox" data-new="${index}"> Add photo</label><div class="image-roles"><label><input type="radio" name="editCover" value="new:${index}"> Gallery cover</label><label><input type="radio" name="editMarker" value="new:${index}"> Map pin</label></div></div></article>`).join("");
+  $("#editCandidates").querySelectorAll("input[type=radio]").forEach((radio) => radio.onchange = () => {
     radio.closest(".new-photo").querySelector("input[type=checkbox]").checked = true;
-  }));
-}
-function trackRoleRadios(container) {
-  container.querySelectorAll("input[type=radio]").forEach(
-    (radio) =>
-      radio.addEventListener("change", () => {
-        if (radio.name === "editCover") editCoverRef = radio.value;
-        if (radio.name === "editMarker") editMarkerRef = radio.value;
-      }),
-  );
+  });
 }
 async function findMorePhotos() {
   const button = $("#findMorePhotos");
@@ -475,10 +425,8 @@ async function fillMissingEditDetails(siteId) {
     field("mapsQuery").value =
       `${editingSite.name}, Lucknow, Uttar Pradesh, India`;
 
-  // Note: deliberately does NOT write a placeholder into coordVerified —
-  // that string used to end up in sites.json if Save was pressed mid-lookup.
-  editAutofilling = true;
-  setEditBusy(true, "Looking up missing details…");
+  if (wasMissing.coordVerified)
+    field("coordVerified").value = "checking";
 
   try {
     const data = await api("/api/research", {
@@ -514,7 +462,7 @@ async function fillMissingEditDetails(siteId) {
           `https://www.google.com/maps?q=${editingSite.lat},${editingSite.lng}`;
     } else {
       if (wasMissing.coordVerified)
-        field("coordVerified").value = "low";
+        field("coordVerified").value = "unverified";
 
       if (wasMissing.coordSource && editingSite.lat && editingSite.lng)
         field("coordSource").value =
@@ -524,26 +472,14 @@ async function fillMissingEditDetails(siteId) {
     if (editingSite?.id !== siteId) return;
 
     if (wasMissing.coordVerified)
-      field("coordVerified").value = "low";
+      field("coordVerified").value = "unverified";
 
     if (wasMissing.coordSource && editingSite.lat && editingSite.lng)
       field("coordSource").value =
         `https://www.google.com/maps?q=${editingSite.lat},${editingSite.lng}`;
 
     console.warn("Could not research missing editor fields:", error);
-  } finally {
-    if (editingSite?.id === siteId) {
-      editAutofilling = false;
-      setEditBusy(false);
-    }
   }
-}
-function setEditBusy(isBusy, note = "") {
-  const button = $("#saveSite");
-  if (!button) return;
-  button.disabled = isBusy;
-  button.textContent = isBusy ? "Please wait…" : "Save changes";
-  button.title = note;
 }
 
 function openEditor() {
@@ -556,9 +492,6 @@ function openEditor() {
   if (!editingSite.mapsQuery)
     editingSite.mapsQuery =
       `${editingSite.name}, Lucknow, Uttar Pradesh, India`;
-
-  editCoverRef = editingSite.cover ? `old:${editingSite.cover}` : "";
-  editMarkerRef = `old:${editingSite.markerImage || editingSite.cover || ""}`;
 
   renderDraftInto($("#editForm"), editingSite);
   renderEditPhotos();
@@ -575,11 +508,6 @@ function renderDraftInto(element, draft) {
   element.innerHTML = fields.map(([key, label, size, type]) => `<label class="field ${size}"><span>${label}</span>${type === "textarea" ? `<textarea name="${key}" ${required.includes(key) ? "required" : ""}>${escapeHtml(draft[key])}</textarea>` : `<input name="${key}" value="${escapeHtml(draft[key])}" ${required.includes(key) ? "required" : ""}>`}</label>`).join("");
 }
 $("#siteSearch").oninput = siteOptions;
-$("#siteSearch").onkeydown = (event) => {
-  if (event.key !== "Enter") return;
-  event.preventDefault();
-  openEditor();
-};
 $("#editSite").onclick = openEditor;
 $("#reloadSites").onclick = () => loadSites().catch((e) => toast(e.message, true));
 $("#saveSite").onclick = async () => {
@@ -598,12 +526,7 @@ $("#saveSite").onclick = async () => {
 };
 async function checkPublish() {
   const state = await api("/api/publish/status");
-  const lines = state.status ? state.status.split("\n").filter(Boolean) : [];
-  $("#publishState").innerHTML = lines.length
-    ? `<strong>${state.branch}: ${lines.length} changed path(s)</strong><ul class="publish-diff">${lines
-        .map((line) => `<li><code>${escapeHtml(line)}</code></li>`)
-        .join("")}</ul>`
-    : `${escapeHtml(state.branch)}: no unpublished changes`;
+  $("#publishState").textContent = state.status ? `${state.branch}: ${state.status.split("\n").length} changed path(s)` : `${state.branch}: no unpublished changes`;
   return state;
 }
 $("#checkPublish").onclick = () => checkPublish().catch((e) => toast(e.message, true));
@@ -672,16 +595,6 @@ function setupWorkspaceNavigation() {
       button.classList.toggle("active", active);
       button.setAttribute("aria-pressed", String(active));
     });
-
-    // The Settings tab used to open onto a collapsed card, so the panel needed
-    // a second click to reveal. Expand it with the tab instead.
-    const settingsForm = $("#settingsForm");
-    const wantsForm = selected === "settings";
-    if (settingsForm && settingsForm.classList.contains("hidden") === wantsForm) {
-      settingsForm.classList.toggle("hidden", !wantsForm);
-      $("#settingsToggle").setAttribute("aria-expanded", String(wantsForm));
-      $("#settingsToggle").textContent = wantsForm ? "Hide" : "Configure";
-    }
 
     localStorage.setItem("atlasWorkspace", selected);
     window.scrollTo({ top: 0, behavior: "smooth" });

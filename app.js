@@ -149,6 +149,33 @@ function defaultActiveCategories(){
   return new Set(categories().filter(category => category !== "Food"));
 }
 
+function hasValidCoords(site){
+  if(!site) return false;
+
+  if(
+    site.lat === null ||
+    site.lat === undefined ||
+    site.lat === "" ||
+    site.lng === null ||
+    site.lng === undefined ||
+    site.lng === ""
+  ){
+    return false;
+  }
+
+  const lat = Number(site.lat);
+  const lng = Number(site.lng);
+
+  return (
+    Number.isFinite(lat) &&
+    Number.isFinite(lng) &&
+    lat >= -90 &&
+    lat <= 90 &&
+    lng >= -180 &&
+    lng <= 180
+  );
+}
+
 function normalizedSearch(){
   return qs("#search").value.trim().toLowerCase();
 }
@@ -340,7 +367,18 @@ function renderSiteList(){
 }
 
 function boundsFor(list){
-  return L.latLngBounds(list.map(site => [Number(site.lat), Number(site.lng)]));
+  const valid = list.filter(hasValidCoords);
+
+  if(!valid.length){
+    return null;
+  }
+
+  return L.latLngBounds(
+    valid.map(site => [
+      Number(site.lat),
+      Number(site.lng)
+    ])
+  );
 }
 
 function fitHome(){
@@ -367,7 +405,7 @@ function fitHome(){
 }
 
 function fitVisible(){
-  const visible = visibleSites();
+  const visible = visibleSites().filter(hasValidCoords);
   if(!visible.length) return;
 
   if(visible.length === 1){
@@ -375,7 +413,10 @@ function fitVisible(){
     return;
   }
 
-  map.fitBounds(boundsFor(visible).pad(.12), {
+  const bounds = boundsFor(visible);
+  if(!bounds) return;
+
+  map.fitBounds(bounds.pad(.12), {
     maxZoom: isMobile() ? 13 : 14,
     animate: true
   });
@@ -383,13 +424,16 @@ function fitVisible(){
 
 function fitSearchResults(){
   if(!normalizedSearch()) return;
-  const visible = visibleSites();
+  const visible = visibleSites().filter(hasValidCoords);
   if(!visible.length) return;
 
   if(visible.length === 1){
     map.flyTo([visible[0].lat, visible[0].lng], 15, {duration: .3});
   }else{
-    map.fitBounds(boundsFor(visible).pad(.18), {
+    const bounds = boundsFor(visible);
+    if(!bounds) return;
+
+    map.fitBounds(bounds.pad(.18), {
       maxZoom: 14,
       animate: true
     });
@@ -476,8 +520,16 @@ async function showDetail(site){
 
   qs("#detailYear").textContent = site.year || "";
   qs("#detailSummary").textContent = site.summary || "";
-  const directionsDestination = site.mapsQuery || `${site.name}, Lucknow, Uttar Pradesh, India`;
-  qs("#directionsLink").href = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(directionsDestination)}`;
+  if (site.mapsUrl) {
+    qs("#directionsLink").href = site.mapsUrl;
+  } else {
+    const directionsDestination =
+      site.mapsQuery ||
+      `${site.name}, Lucknow, Uttar Pradesh, India`;
+
+    qs("#directionsLink").href =
+      `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(directionsDestination)}`;
+  }
   qs("#wikiLink").href = site.wiki
     ? `https://en.wikipedia.org/wiki/${encodeURIComponent(site.wiki.replaceAll(" ", "_"))}`
     : "#";
@@ -504,7 +556,7 @@ function selectSite(id, fly = false){
 
   if(!site) return;
 
-  if(fly){
+  if(fly && hasValidCoords(site)){
     homeMode = false;
   }
 
@@ -514,7 +566,7 @@ function selectSite(id, fly = false){
   renderSiteList();
   showDetail(site);
 
-  if(fly){
+  if(fly && hasValidCoords(site)){
     map.flyTo(
       [
         Number(site.lat),
@@ -615,7 +667,7 @@ function nearMe(){
     const lng = position.coords.longitude;
 
     const ranked = sites
-      .filter(site => Number.isFinite(Number(site.lat)) && Number.isFinite(Number(site.lng)))
+      .filter(hasValidCoords)
       .map(site => ({
         ...site,
         distance: distanceKm(lat, lng, Number(site.lat), Number(site.lng))
@@ -746,7 +798,7 @@ function wire(){
 
   qs("#focusBtn").addEventListener("click", () => {
     const site = sites.find(item => item.id === selectedId);
-    if(!site) return;
+    if(!site || !hasValidCoords(site)) return;
 
     if(isMobile()){
       qs("#detailDrawer").classList.add("hidden");

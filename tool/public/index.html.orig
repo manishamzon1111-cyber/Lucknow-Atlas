@@ -114,13 +114,7 @@
         <div class="publish-actions"><input id="commitMessage" maxlength="120" value="Update Lucknow Atlas places"><button id="checkPublish" class="secondary">Check</button><button id="publish">Publish main</button></div>
       </section>
     </main>
-    <div
-      id="toast"
-      class="toast hidden"
-      role="status"
-      aria-live="polite"
-      title="Click to dismiss"
-    ></div>
+    <div id="toast" class="toast hidden"></div>
     <script src="app.js" type="module"></script>
   </body>
 </html>

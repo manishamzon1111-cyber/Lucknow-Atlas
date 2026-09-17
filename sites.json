@@ -756,7 +756,8 @@
       "Mughlai"
     ],
     "area": "Aminabad",
-    "images": []
+    "images": [],
+    "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Tunday%20Kababi%2C%20Aminabad&query_place_id=ChIJEfzCO7r9mzkRHFoXu7K_eCw"
   },
   {
     "id": "dastarkhwan-tulsi-theatre",
@@ -774,7 +775,17 @@
       "Kebabs"
     ],
     "area": "Kaiserbagh",
-    "images": []
+    "images": [
+      "img/dasttulsthea/1.jpg",
+      "img/dasttulsthea/2.jpg",
+      "img/dasttulsthea/3.jpg"
+    ],
+    "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Dastarkhwan%20Tulsi%20Theatre&query_place_id=ChIJU9iWBqT9mzkRf_g8MpqY5ts",
+    "wiki": "",
+    "cover": "img/dasttulsthea/1.jpg",
+    "markerImage": "img/dasttulsthea/1.jpg",
+    "coordVerified": "low",
+    "coordSource": "https://www.google.com/maps?q=26.8521875,80.9360625"
   },
   {
     "id": "raheems-kulcha-nahari",
@@ -782,8 +793,8 @@
     "category": "Food",
     "period": "Lucknow Food",
     "year": "Historic eatery",
-    "lat": null,
-    "lng": null,
+    "lat": 26.8665,
+    "lng": 80.9152,
     "mapsQuery": "Akbari Gate, Shahganj, Lucknow, Uttar Pradesh 226003",
     "summary": "A classic old-Lucknow stop known above all for nahari served with crisp kulcha.",
     "foodType": [
@@ -792,7 +803,8 @@
       "Awadhi"
     ],
     "area": "Chowk",
-    "images": []
+    "images": [],
+    "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Raheem%27s%20Kulcha-Nahari&query_place_id=ChIJhSfNA-f9mzkRJoc6wjf5teA"
   },
   {
     "id": "mubeens-chowk",
@@ -810,7 +822,8 @@
       "Mughlai"
     ],
     "area": "Chowk",
-    "images": []
+    "images": [],
+    "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Mubeen%27s&query_place_id=ChIJNxi0Hef9mzkR9T4BxXVfpa4"
   },
   {
     "id": "open-air-restaurant",
@@ -818,8 +831,8 @@
     "category": "Food",
     "period": "Lucknow Food",
     "year": "Mughlai restaurant",
-    "lat": null,
-    "lng": null,
+    "lat": 26.852187,
+    "lng": 80.936062,
     "mapsQuery": "Osama Talha Rd, Near Tulsi Theatre, DM Compound Colony, Kaiserbagh Officer's Colony, Hazratganj, Lucknow, Uttar Pradesh 226001",
     "summary": "A popular Mughlai restaurant near Tulsi Theatre, frequently recommended for chicken masala and kebabs.",
     "foodType": [
@@ -828,7 +841,8 @@
       "Mughlai"
     ],
     "area": "Kaiserbagh",
-    "images": []
+    "images": [],
+    "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Open%20Air%20Restaurant&query_place_id=ChIJhZncBqT9mzkR51y0HPpXE4k"
   },
   {
     "id": "jain-chaat-bhandar",
@@ -846,7 +860,8 @@
       "Vegetarian"
     ],
     "area": "Lalbagh",
-    "images": []
+    "images": [],
+    "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Jain%20Chaat%20Bhandar&query_place_id=ChIJiR-20qf9mzkRDULdICiNmAE"
   },
   {
     "id": "wahid-biryani-aminabad",
@@ -864,7 +879,8 @@
       "Mughlai"
     ],
     "area": "Aminabad",
-    "images": []
+    "images": [],
+    "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Wahid%20Biryani&query_place_id=ChIJZ5XuVrf9mzkR-743QMHHYzI"
   },
   {
     "id": "durga-khasta-corner",
@@ -872,8 +888,8 @@
     "category": "Food",
     "period": "Lucknow Food",
     "year": "Breakfast shop",
-    "lat": null,
-    "lng": null,
+    "lat": 26.844684,
+    "lng": 80.928406,
     "mapsQuery": "Durga Khasta Corner, Latouche Road, Lucknow, Uttar Pradesh",
     "summary": "A well-known breakfast stop for khasta, kachori and traditional morning snacks.",
     "foodType": [
@@ -882,7 +898,8 @@
       "Street Food"
     ],
     "area": "Latouche Road",
-    "images": []
+    "images": [],
+    "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Durga%20Khasta%20Corner&query_place_id=ChIJkVfHF7H9mzkRXLUDJWG6jCo"
   },
   {
     "id": "sakhawat-restaurant",
@@ -890,8 +907,8 @@
     "category": "Food",
     "period": "Lucknow Food",
     "year": "Traditional restaurant",
-    "lat": null,
-    "lng": null,
+    "lat": 26.852685,
+    "lng": 80.934888,
     "mapsQuery": "2, Behind Oudh Gymkhana Club, Kaiserbagh, Lucknow, Uttar Pradesh 226018",
     "summary": "An old-school Lucknow restaurant known for kebabs, biryani and traditional meat dishes.",
     "foodType": [
@@ -900,6 +917,7 @@
       "Awadhi"
     ],
     "area": "Kaiserbagh",
-    "images": []
+    "images": [],
+    "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Sakhawat%20Restaurant&query_place_id=ChIJM6M9gKP9mzkR0puvW6V747Y"
   }
 ]

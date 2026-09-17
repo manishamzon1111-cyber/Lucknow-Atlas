@@ -932,32 +932,3 @@ main > .card:first-child {
   from { opacity: 0.3; }
   to { opacity: 1; }
 }
-
-
-/* Photo-selection limit warning */
-.pill-warn {
-  border-color: #f0aaa4;
-  background: var(--danger-bg);
-  color: var(--danger);
-}
-
-button[disabled] {
-  cursor: not-allowed;
-  opacity: 0.55;
-}
-
-.publish-diff {
-  list-style: none;
-  margin: 8px 0 0;
-  padding: 0;
-  max-height: 160px;
-  overflow-y: auto;
-  font-size: 12.5px;
-}
-.publish-diff li {
-  padding: 2px 0;
-  color: var(--muted);
-}
-.publish-diff code {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-}

@@ -1275,34 +1275,13 @@ async function saveSite({
   validateDraft(draft, sites.filter((_, itemIndex) => itemIndex !== index));
   const allowed = new Set(sites[index].images || []);
   const kept = [...new Set(images.map(clean))];
-  if (!Array.isArray(newImages)) newImages = [];
-  if (kept.length + newImages.length === 0)
-    throw new Error("Keep or add at least one photo");
+  if (!kept.length) throw new Error("Keep at least one photo");
   if (kept.some((item) => !allowed.has(item)))
     throw new Error("Unknown photo path in edit request");
-  if (kept.length + newImages.length > 8)
+  if (!Array.isArray(newImages) || kept.length + newImages.length > 8)
     throw new Error("A place can have at most 8 photos");
-  const existingPath = kept[0] || sites[index].images?.[0] || "";
-  let folder = existingPath
-    ? path.dirname(existingPath).replace(/^img\//, "")
-    : "";
-  if (folder === "." || folder === "/") folder = "";
-  if (!folder) {
-    // The place has no photos yet, so allocate a fresh folder the same way
-    // addPlace does rather than falling through to img/ itself.
-    const base = shortSlug(clean(draft.id) || clean(originalId));
-    folder = base;
-    for (
-      let i = 2;
-      await fs.stat(path.join(IMG, folder)).then(
-        () => true,
-        () => false,
-      );
-      i++
-    )
-      folder = `${base}${i}`;
-  }
-  if (folder.includes("..") || folder.includes("/"))
+  const folder = path.dirname(kept[0] || sites[index].images?.[0] || "").replace(/^img\//, "");
+  if (!folder || folder.includes("..") || folder.includes("/"))
     throw new Error("Could not determine this place's image folder");
   const stage = path.join(HERE, `.stage-${crypto.randomUUID()}`);
   const finalDir = path.join(IMG, folder);
@@ -1320,11 +1299,8 @@ async function saveSite({
       added.push({ filename, path: `img/${folder}/${filename}` });
     }
     const existingHashes = new Set();
-    for (const [siteIndex, site] of sites.entries())
+    for (const site of sites)
       for (const relative of site.images || []) {
-        // Skip the place being edited: its own photos may be on their way out,
-        // and re-adding one should not read as an Atlas-wide duplicate.
-        if (siteIndex === index && !kept.includes(relative)) continue;
         const hash = await fs.readFile(path.join(ROOT, relative)).then(
           (data) => crypto.createHash("sha256").update(data).digest("hex"),
           () => "",

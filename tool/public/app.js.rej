@@ -1,0 +1,36 @@
+@@ -561,20 +633,26 @@
+     button.textContent = original;
+   }
+ };
+-$("#saveSite").onclick = async () => {
++$("#saveSite").onclick = busy($("#saveSite"), "Saving…", async () => {
++  if (editAutofilling)
++    return toast("Still looking up missing details — try again in a moment.", true);
+   const cards = [...$("#editPhotos").querySelectorAll(".edit-photo")];
+   const kept = cards.filter((card) => !card.querySelector('.remove-photo input').checked).map((card) => editingSite.imageDetails[Number(card.dataset.index)].path);
+   const selectedNew = [...$("#editCandidates").querySelectorAll("input[data-new]:checked")].map((input) => ({ original: Number(input.dataset.new), image: editCandidates[Number(input.dataset.new)] }));
++  if (!kept.length && !selectedNew.length) return toast("Keep or add at least one photo.", true);
+   if (kept.length + selectedNew.length > 8) return toast("A place can have at most 8 photos.", true);
+   const remap = (value) => value?.startsWith("new:") ? `new:${selectedNew.findIndex((item) => item.original === Number(value.slice(4)))}` : value;
+-  const coverRef = remap(document.querySelector('input[name="editCover"]:checked')?.value);
+-  const markerRef = remap(document.querySelector('input[name="editMarker"]:checked')?.value);
+-  if (coverRef === "new:-1" || markerRef === "new:-1") return toast("Select any new photo chosen as cover or map pin.", true);
+-  try {
+-    const saved = await api("/api/site/save", { method: "POST", body: JSON.stringify({ originalId: editingSite.id, draft: Object.fromEntries(new FormData($("#editForm"))), images: kept, newImages: selectedNew.map((item) => item.image), coverRef, markerRef }) });
+-    toast(`${saved.entry.name} updated. Backup: ${saved.backup}`); $("#siteEditor").classList.add("hidden"); await Promise.all([loadSites(), loadStatus()]);
+-  } catch (error) { toast(error.message, true); }
+-};
++  const coverRef = remap(editCoverRef);
++  const markerRef = remap(editMarkerRef);
++  if (!coverRef || !markerRef) return toast("Choose a gallery cover and a map pin.", true);
++  if (coverRef === "new:-1" || markerRef === "new:-1") return toast("Tick 'Add photo' on any new image chosen as cover or map pin.", true);
++  if (coverRef.startsWith("old:") && !kept.includes(coverRef.slice(4)))
++    return toast("The gallery cover is marked for removal. Pick another cover.", true);
++  if (markerRef.startsWith("old:") && !kept.includes(markerRef.slice(4)))
++    return toast("The map pin is marked for removal. Pick another pin.", true);
++  const saved = await api("/api/site/save", { method: "POST", body: JSON.stringify({ originalId: editingSite.id, draft: Object.fromEntries(new FormData($("#editForm"))), images: kept, newImages: selectedNew.map((item) => item.image), coverRef, markerRef }) });
++  toast(`${saved.entry.name} updated. Backup: ${saved.backup}`); $("#siteEditor").classList.add("hidden"); await loadSites();
++});
+ async function checkPublish() {
+   const state = await api("/api/publish/status");
+   $("#publishState").textContent = state.status ? `${state.branch}: ${state.status.split("\n").length} changed path(s)` : `${state.branch}: no unpublished changes`;
