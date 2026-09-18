@@ -1,16 +1,1 @@
-[
-  {
-    "id": "ui-test",
-    "type": "notice",
-    "title": "Test update",
-    "description": "Temporary item for checking the City updates interface.",
-    "siteId": "",
-    "startDate": "2026-09-18T09:00:00+05:30",
-    "endDate": "2026-09-19T23:59:00+05:30",
-    "source": {
-      "name": "Test",
-      "url": "https://lucknow-atlas.vercel.app/"
-    },
-    "addedOn": "2026-09-18"
-  }
-]
+[]

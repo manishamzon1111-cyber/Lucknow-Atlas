@@ -67,11 +67,8 @@ RSS_QUERIES = [
 
 
 ALLOW_TERMS = [
-    "heritage",
     "heritage walk",
-    "walk",
     "exhibition",
-    "exhibit",
     "festival",
     "mahotsav",
     "museum",
@@ -85,16 +82,13 @@ ALLOW_TERMS = [
     "traffic diversion",
     "route diverted",
     "diversion",
-    "timing",
-    "cultural",
-    "culture",
+    "timing change",
     "tourism",
-    "performance",
-    "music",
-    "dance",
-    "theatre",
-    "program",
-    "programme",
+    "cultural festival",
+    "cultural programme",
+    "cultural program",
+    "theatre festival",
+    "heritage festival",
     "samaroh",
 ]
 
@@ -114,18 +108,37 @@ BLOCK_TERMS = [
     "bahujan",
     "political rally",
     "party worker",
+
     "vacancy",
     "recruitment",
+    "advertisement",
+    "engagement of",
+    "appointment",
+    "interview",
     "admission",
+    "academic session",
     "exam",
+    "examination",
     "result",
     "hostel",
+    "semester",
+    "syllabus",
+    "guest accompanist",
+
     "tender",
     "quotation",
     "property",
     "real estate",
     "stock market",
+
+    "sports competition",
+    "sports meet",
+    "athletics",
+    "tournament",
+
+    "azamgarh",
 ]
+
 
 
 # ------------------------------------------------------------
@@ -256,7 +269,7 @@ def candidate(
     if not url.startswith(("http://", "https://")):
         return None
 
-    combined = f"{title} {snippet}"
+    combined = title
 
     ok, matched = relevant(combined)
 
@@ -410,7 +423,7 @@ def extract_rss(query: str) -> list[dict]:
 
     response = get(url)
 
-    feed = feedparser.loads(
+    feed = feedparser.parse(
         response.content
     )
 
