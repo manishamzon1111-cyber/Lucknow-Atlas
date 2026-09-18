@@ -70,6 +70,10 @@
 
     if(!start || !end) return "";
 
+    if(item.auto){
+      return `Published ${dateOnly(start)}, ${timeOnly(start)}`;
+    }
+
     if(dayKey(start) === dayKey(end)){
       return `${dateOnly(start)} · ${timeOnly(start)}–${timeOnly(end)}`;
     }
@@ -238,21 +242,40 @@
 
   async function load(){
     try{
-      const response = await fetch("./updates.json", {
-        cache: "no-store"
-      });
+      const [manualResult, autoResult] = await Promise.allSettled([
+        fetch("./updates.json", {cache:"no-store"}).then(r => {
+          if(!r.ok) throw new Error(`updates.json returned ${r.status}`);
+          return r.json();
+        }),
+        fetch("/api/city-updates").then(r => {
+          if(!r.ok) throw new Error(`city updates API returned ${r.status}`);
+          return r.json();
+        })
+      ]);
 
-      if(!response.ok){
-        throw new Error(`updates.json returned ${response.status}`);
+      const manual =
+        manualResult.status === "fulfilled" &&
+        Array.isArray(manualResult.value)
+          ? manualResult.value
+          : [];
+
+      const automatic =
+        autoResult.status === "fulfilled" &&
+        Array.isArray(autoResult.value)
+          ? autoResult.value
+          : [];
+
+      const merged = [];
+      const ids = new Set();
+
+      for(const item of [...manual, ...automatic]){
+        if(!item || ids.has(item.id)) continue;
+        ids.add(item.id);
+        merged.push(item);
       }
 
-      const data = await response.json();
+      updates = currentItems(merged);
 
-      if(!Array.isArray(data)){
-        throw new Error("updates.json must contain an array");
-      }
-
-      updates = currentItems(data);
     }catch(error){
       updates = [];
       console.warn("City updates:", error);
