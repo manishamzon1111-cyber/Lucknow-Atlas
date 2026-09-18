@@ -45,7 +45,14 @@ async function currentSnapshot() {
     ? Date.now() - Date.parse(snap.generatedAt)
     : Infinity;
 
-  if (age > STALE_MS) {
+  const missingEventThumbs =
+    Array.isArray(snap?.items) &&
+    snap.items.some(item =>
+      item?.source === "HappeningNext" &&
+      !item?.imageUrl
+    );
+
+  if (age > STALE_MS || missingEventThumbs) {
     try {
       inflight ||= refreshCityUpdates().finally(() => { inflight = null; });
       snap = await inflight;
