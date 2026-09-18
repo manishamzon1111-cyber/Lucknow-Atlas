@@ -53,10 +53,16 @@ DIRECT_SOURCES = [
 
 RSS_QUERIES = [
     '"Lucknow" "heritage walk"',
-    '"Lucknow" (exhibition OR festival OR mahotsav)',
+    '"Lucknow" exhibition',
+    '"Lucknow" cultural festival',
+    '"Lucknow" mahotsav',
+    '"Lucknow" museum exhibition',
+    '"State Museum Lucknow" exhibition',
+    '"Bhatkhande" Lucknow festival',
+    '"Sanatkada" Lucknow',
+    '"UP Tourism" Lucknow event',
     '"Lucknow" ("traffic diversion" OR "route diverted")',
     '("Rumi Darwaza" OR "Bara Imambara" OR "Chota Imambara" OR "British Residency") (closed OR closure OR restoration)',
-    '"State Museum Lucknow" exhibition',
 ]
 
 
@@ -477,6 +483,42 @@ def title_key(title):
     return norm(title)
 
 
+def topic_key(title):
+    t = norm(title)
+
+    topic_patterns = [
+        ("gomti book festival", "gomti-book-festival"),
+        ("sanatkada", "sanatkada"),
+        ("awadh mahotsav", "awadh-mahotsav"),
+        ("mango festival", "mango-festival"),
+        ("state museum", "state-museum"),
+        ("heritage walk", "heritage-walk"),
+        ("rumi darwaza", "rumi-darwaza"),
+        ("bara imambara", "bara-imambara"),
+        ("bada imambara", "bara-imambara"),
+        ("chota imambara", "chota-imambara"),
+        ("chhota imambara", "chota-imambara"),
+        ("british residency", "british-residency"),
+        ("lucknow residency", "british-residency"),
+        ("bhatkhande", "bhatkhande"),
+    ]
+
+    for needle, key in topic_patterns:
+        if needle in t:
+            return key
+
+    words = [
+        w for w in t.split()
+        if w not in {
+            "lucknow", "news", "today", "latest",
+            "the", "a", "an", "in", "at", "for",
+            "to", "of", "and", "on", "with"
+        }
+    ]
+
+    return " ".join(words[:8])
+
+
 def main():
     seen = load_seen()
 
@@ -523,7 +565,7 @@ def main():
     deduped = {}
 
     for item in collected:
-        key = title_key(item["title"])
+        key = topic_key(item["title"])
 
         if key and key not in deduped:
             deduped[key] = item
