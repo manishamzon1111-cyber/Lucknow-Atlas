@@ -9,3 +9,5 @@ tool/.txn.*.tmp
 node_modules
 *.log
 backups/
+
+.city-updates/
