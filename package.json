@@ -1,0 +1,9 @@
+{
+  "name": "lucknow-atlas",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@upstash/redis": "^1.38.4",
+    "cheerio": "^1.2.0"
+  }
+}
