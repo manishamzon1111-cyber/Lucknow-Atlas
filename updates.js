@@ -2,7 +2,7 @@
   "use strict";
 
   const LIMIT = 6;
-  let updates = [];
+  const REFRESH_MS = 60 * 1000;
 
   const TYPE_LABELS = {
     heritage_walk: "Heritage walk",
@@ -11,6 +11,8 @@
     festival: "Festival",
     notice: "Notice"
   };
+
+  let updates = [];
 
   function esc(value){
     return String(value ?? "").replace(/[&<>"']/g, ch => ({
@@ -29,21 +31,36 @@
 
   function safeUrl(value){
     try{
-      const u = new URL(String(value || ""), location.href);
-      return ["http:","https:"].includes(u.protocol) ? u.href : "";
+      const url = new URL(String(value || ""), location.href);
+      return ["http:", "https:"].includes(url.protocol) ? url.href : "";
     }catch{
       return "";
     }
   }
 
-  function formatDate(date){
+  function dateOnly(date){
     return new Intl.DateTimeFormat("en-IN", {
-      timeZone:"Asia/Kolkata",
-      weekday:"short",
-      day:"numeric",
-      month:"short",
-      hour:"numeric",
-      minute:"2-digit"
+      timeZone: "Asia/Kolkata",
+      weekday: "short",
+      day: "numeric",
+      month: "short"
+    }).format(date);
+  }
+
+  function timeOnly(date){
+    return new Intl.DateTimeFormat("en-IN", {
+      timeZone: "Asia/Kolkata",
+      hour: "numeric",
+      minute: "2-digit"
+    }).format(date);
+  }
+
+  function dayKey(date){
+    return new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Asia/Kolkata",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit"
     }).format(date);
   }
 
@@ -51,17 +68,16 @@
     const start = parseDate(item.startDate);
     const end = parseDate(item.endDate);
 
-    if(start && end){
-      return `${formatDate(start)} – ${formatDate(end)}`;
+    if(!start || !end) return "";
+
+    if(dayKey(start) === dayKey(end)){
+      return `${dateOnly(start)} · ${timeOnly(start)}–${timeOnly(end)}`;
     }
 
-    if(start) return formatDate(start);
-    if(end) return formatDate(end);
-
-    return "";
+    return `${dateOnly(start)}, ${timeOnly(start)} – ${dateOnly(end)}, ${timeOnly(end)}`;
   }
 
-  function isValid(item){
+  function valid(item){
     if(!item || typeof item !== "object") return false;
     if(!String(item.id || "").trim()) return false;
     if(!String(item.title || "").trim()) return false;
@@ -70,8 +86,7 @@
     const start = parseDate(item.startDate);
     const end = parseDate(item.endDate);
 
-    if(!start || !end) return false;
-    if(end < start) return false;
+    if(!start || !end || end < start) return false;
 
     if(
       !item.source ||
@@ -84,13 +99,13 @@
     return true;
   }
 
-  function activeItems(all){
+  function currentItems(data){
     const now = Date.now();
 
-    return all
-      .filter(isValid)
+    return data
+      .filter(valid)
       .filter(item => parseDate(item.endDate).getTime() >= now)
-      .sort((a,b) =>
+      .sort((a, b) =>
         parseDate(a.startDate).getTime() -
         parseDate(b.startDate).getTime()
       )
@@ -122,17 +137,16 @@
     mobile.classList.remove("hidden");
   }
 
-  function renderList(){
+  function render(){
     const list = document.getElementById("cityUpdatesList");
     if(!list) return;
 
     list.innerHTML = updates.map(item => {
-      const sourceUrl = safeUrl(item.source.url);
-      const description = String(item.description || "").trim();
+      const url = safeUrl(item.source.url);
+      const desc = String(item.description || "").trim();
 
       return `
-        <article class="city-update-card">
-
+        <article class="city-update-card" data-type="${esc(item.type)}">
           <div class="city-update-meta">
             <span class="city-update-type">
               ${esc(TYPE_LABELS[item.type])}
@@ -145,34 +159,25 @@
 
           <h3>${esc(item.title)}</h3>
 
-          ${
-            description
-              ? `<p>${esc(description)}</p>`
-              : ""
-          }
+          ${desc ? `<p>${esc(desc)}</p>` : ""}
 
           <div class="city-update-actions">
-
             <a
-              href="${esc(sourceUrl)}"
+              href="${esc(url)}"
               target="_blank"
               rel="noopener noreferrer"
-            >
-              ${esc(item.source.name || "Source")}
-            </a>
+            >${esc(item.source.name || "Source")} ↗</a>
 
             ${
               item.siteId
                 ? `<button
-                    type="button"
-                    class="city-update-map"
-                    data-site-id="${esc(item.siteId)}"
+                     type="button"
+                     class="city-update-map"
+                     data-site-id="${esc(item.siteId)}"
                    >Show on map</button>`
                 : ""
             }
-
           </div>
-
         </article>
       `;
     }).join("");
@@ -181,70 +186,39 @@
   function openDrawer(){
     if(!updates.length) return;
 
-    renderList();
+    render();
 
-    document
-      .getElementById("detailDrawer")
-      ?.classList.add("hidden");
+    document.getElementById("detailDrawer")?.classList.add("hidden");
+    document.getElementById("mobileSheet")?.classList.add("hidden");
+    document.getElementById("nearestPanel")?.remove();
 
-    document
-      .getElementById("mobileSheet")
-      ?.classList.add("hidden");
-
-    document
-      .getElementById("nearestPanel")
-      ?.remove();
-
-    document
-      .getElementById("cityUpdatesDrawer")
-      ?.classList.add("open");
-
-    document
-      .getElementById("cityUpdatesDrawer")
-      ?.setAttribute("aria-hidden","false");
-
-    document
-      .getElementById("cityUpdatesBackdrop")
-      ?.classList.remove("hidden");
+    document.getElementById("cityUpdatesDrawer")?.classList.add("open");
+    document.getElementById("cityUpdatesDrawer")?.setAttribute("aria-hidden", "false");
+    document.getElementById("cityUpdatesBackdrop")?.classList.remove("hidden");
   }
 
   function closeDrawer(){
-    document
-      .getElementById("cityUpdatesDrawer")
-      ?.classList.remove("open");
-
-    document
-      .getElementById("cityUpdatesDrawer")
-      ?.setAttribute("aria-hidden","true");
-
-    document
-      .getElementById("cityUpdatesBackdrop")
-      ?.classList.add("hidden");
+    document.getElementById("cityUpdatesDrawer")?.classList.remove("open");
+    document.getElementById("cityUpdatesDrawer")?.setAttribute("aria-hidden", "true");
+    document.getElementById("cityUpdatesBackdrop")?.classList.add("hidden");
   }
 
   function wire(){
-    document
-      .getElementById("cityUpdatesBtn")
+    document.getElementById("cityUpdatesBtn")
       ?.addEventListener("click", openDrawer);
 
-    document
-      .getElementById("cityUpdatesBtnMobile")
+    document.getElementById("cityUpdatesBtnMobile")
       ?.addEventListener("click", openDrawer);
 
-    document
-      .getElementById("cityUpdatesClose")
+    document.getElementById("cityUpdatesClose")
       ?.addEventListener("click", closeDrawer);
 
-    document
-      .getElementById("cityUpdatesBackdrop")
+    document.getElementById("cityUpdatesBackdrop")
       ?.addEventListener("click", closeDrawer);
 
-    document
-      .getElementById("cityUpdatesList")
+    document.getElementById("cityUpdatesList")
       ?.addEventListener("click", event => {
-        const button =
-          event.target.closest("[data-site-id]");
-
+        const button = event.target.closest("[data-site-id]");
         if(!button) return;
 
         const id = button.dataset.siteId;
@@ -258,54 +232,51 @@
       });
 
     document.addEventListener("keydown", event => {
-      if(event.key === "Escape"){
-        closeDrawer();
-      }
+      if(event.key === "Escape") closeDrawer();
     });
   }
 
   async function load(){
     try{
       const response = await fetch("./updates.json", {
-        cache:"no-store"
+        cache: "no-store"
       });
 
       if(!response.ok){
-        throw new Error(
-          `updates.json returned ${response.status}`
-        );
+        throw new Error(`updates.json returned ${response.status}`);
       }
 
       const data = await response.json();
 
       if(!Array.isArray(data)){
-        throw new Error(
-          "updates.json must contain an array"
-        );
+        throw new Error("updates.json must contain an array");
       }
 
-      updates = activeItems(data);
+      updates = currentItems(data);
     }catch(error){
       updates = [];
       console.warn("City updates:", error);
     }
 
     renderButtons();
+
+    if(
+      document
+        .getElementById("cityUpdatesDrawer")
+        ?.classList.contains("open")
+    ){
+      render();
+    }
   }
 
   function init(){
     wire();
     load();
-
-    window.setInterval(load, 60000);
+    window.setInterval(load, REFRESH_MS);
   }
 
   if(document.readyState === "loading"){
-    document.addEventListener(
-      "DOMContentLoaded",
-      init,
-      {once:true}
-    );
+    document.addEventListener("DOMContentLoaded", init, {once:true});
   }else{
     init();
   }

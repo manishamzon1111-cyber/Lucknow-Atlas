@@ -36,16 +36,13 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -r scripts/city-updates-requirements.txt
 
-      - name: Discover updates
-        run: |
-          python scripts/discover-city-updates.py
+      - name: Discover
+        run: python scripts/discover-city-updates.py
 
       - name: Read result
         id: result
         shell: bash
-        run: |
-          set -euo pipefail
-          cat .city-updates/result.env >> "$GITHUB_OUTPUT"
+        run: cat .city-updates/result.env >> "$GITHUB_OUTPUT"
 
       - name: Create or update review issue
         if: steps.result.outputs.create_issue == '1'
@@ -58,17 +55,17 @@ jobs:
           DATE="$(date -u +%Y-%m-%d)"
           TITLE="City updates review — ${DATE}"
 
-          EXISTING="$(
+          ISSUE="$(
             gh issue list \
               --state open \
               --search "\"${TITLE}\" in:title" \
               --json number,title \
               --jq '.[] | select(.title == "'"${TITLE}"'") | .number' \
-              | head -n 1
+              | head -n1
           )"
 
-          if [ -n "$EXISTING" ]; then
-            gh issue edit "$EXISTING" \
+          if [ -n "$ISSUE" ]; then
+            gh issue edit "$ISSUE" \
               --body-file .city-updates/review.md
           else
             gh issue create \
@@ -76,7 +73,7 @@ jobs:
               --body-file .city-updates/review.md
           fi
 
-      - name: Save discovery state
+      - name: Save seen state
         if: steps.result.outputs.candidate_count != '0'
         shell: bash
         run: |
@@ -90,9 +87,10 @@ jobs:
           git add seen_urls.json
 
           if git diff --cached --quiet; then
-            echo "No state changes."
             exit 0
           fi
 
           git commit -m "Update city discovery state"
-          git push
+
+          git pull --rebase origin main
+          git push origin main

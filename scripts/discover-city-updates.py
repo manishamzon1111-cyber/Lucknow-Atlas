@@ -3,10 +3,10 @@ from __future__ import annotations
 import hashlib
 import html
 import json
-import os
 import re
 import sys
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
+from email.utils import parsedate_to_datetime
 from pathlib import Path
 from urllib.parse import quote_plus, urljoin
 
@@ -17,45 +17,39 @@ from bs4 import BeautifulSoup
 
 ROOT = Path(__file__).resolve().parent.parent
 STATE_FILE = ROOT / "seen_urls.json"
-OUT_DIR = ROOT / ".city-updates"
 
-OUT_DIR.mkdir(exist_ok=True)
+OUT = ROOT / ".city-updates"
+OUT.mkdir(exist_ok=True)
 
-CANDIDATES_FILE = OUT_DIR / "candidates.json"
-REVIEW_FILE = OUT_DIR / "review.md"
-NEXT_STATE_FILE = OUT_DIR / "seen-next.json"
-RESULT_FILE = OUT_DIR / "result.env"
+CANDIDATES_FILE = OUT / "candidates.json"
+REVIEW_FILE = OUT / "review.md"
+NEXT_STATE_FILE = OUT / "seen-next.json"
+RESULT_FILE = OUT / "result.env"
 
-USER_AGENT = (
-    "LucknowAtlas/1.0 "
-    "(public heritage map; update discovery)"
-)
-
+USER_AGENT = "LucknowAtlas/1.0"
 TIMEOUT = 25
-MAX_CANDIDATES = 25
+MAX_CANDIDATES = 15
+MAX_AGE_DAYS = 45
 
-
-# ------------------------------------------------------------
-# SOURCES
-# ------------------------------------------------------------
 
 DIRECT_SOURCES = [
     {
         "name": "Lucknow District Administration",
         "url": "https://lucknow.nic.in/past-notices/notices/",
-        "kind": "official",
+        "kind": "district",
     },
     {
         "name": "Bhatkhande Sanskriti Vishwavidyalaya — Notices",
         "url": "https://www.bhatkhandeuniversity.ac.in/en/feature/notices-announcements",
-        "kind": "official",
+        "kind": "bhatkhande",
     },
     {
         "name": "Bhatkhande Sanskriti Vishwavidyalaya — Press releases",
         "url": "https://www.bhatkhandeuniversity.ac.in/en/pressrelease",
-        "kind": "official",
+        "kind": "bhatkhande",
     },
 ]
+
 
 RSS_QUERIES = [
     '"Lucknow" "heritage walk"',
@@ -66,9 +60,29 @@ RSS_QUERIES = [
 ]
 
 
-ALLOW_TERMS = [
+GEO_TERMS = [
+    "lucknow",
+    "bara imambara",
+    "bada imambara",
+    "chota imambara",
+    "chhota imambara",
+    "rumi darwaza",
+    "british residency",
+    "lucknow residency",
+    "kaiserbagh",
+    "qaiserbagh",
+    "chowk",
+    "hazratganj",
+    "aminabad",
+    "gomti",
+]
+
+
+STRONG_TERMS = [
     "heritage walk",
     "exhibition",
+    "cultural festival",
+    "heritage festival",
     "festival",
     "mahotsav",
     "museum",
@@ -83,14 +97,40 @@ ALLOW_TERMS = [
     "route diverted",
     "diversion",
     "timing change",
-    "tourism",
-    "cultural festival",
     "cultural programme",
     "cultural program",
     "theatre festival",
-    "heritage festival",
     "samaroh",
 ]
+
+
+BHATKHANDE_TERMS = [
+    "festival",
+    "mahotsav",
+    "samaroh",
+    "exhibition",
+    "heritage",
+    "cultural programme",
+    "cultural program",
+    "public performance",
+    "concert",
+]
+
+
+DISTRICT_TERMS = [
+    "heritage",
+    "festival",
+    "mahotsav",
+    "monument",
+    "closure",
+    "closed",
+    "diversion",
+    "traffic",
+    "tourism",
+    "cultural",
+    "museum",
+]
+
 
 BLOCK_TERMS = [
     "murder",
@@ -102,12 +142,12 @@ BLOCK_TERMS = [
     "rape",
     "election",
     "candidate",
+    "political rally",
+    "party worker",
     "bjp",
     "congress",
     "samajwadi",
     "bahujan",
-    "political rally",
-    "party worker",
 
     "vacancy",
     "recruitment",
@@ -124,178 +164,34 @@ BLOCK_TERMS = [
     "semester",
     "syllabus",
     "guest accompanist",
-
     "tender",
     "quotation",
-    "property",
-    "real estate",
-    "stock market",
 
     "sports competition",
     "sports meet",
-    "athletics",
     "tournament",
+    "athletics",
 
+    "rojgar",
+    "employment fair",
+    "job fair",
+
+    "property",
+    "real estate",
+    "stock market",
+    "saplings",
+    "plantation",
+    "mango variety",
+
+    "ayodhya",
+    "faizabad",
+    "bhopal",
+    "kanpur",
+    "dehradun",
+    "sambhajinagar",
     "azamgarh",
 ]
 
-
-
-# ------------------------------------------------------------
-# HELPERS
-# ------------------------------------------------------------
-
-def clean(value: object) -> str:
-    text = html.unescape(str(value or ""))
-    return re.sub(r"\s+", " ", text).strip()
-
-
-def normalize(value: str) -> str:
-    value = clean(value).lower()
-    value = re.sub(r"[^a-z0-9\u0900-\u097f]+", " ", value)
-    return re.sub(r"\s+", " ", value).strip()
-
-
-def fingerprint(title: str, source: str, url: str) -> str:
-    raw = " | ".join([
-        normalize(title),
-        normalize(source),
-        clean(url),
-    ])
-
-    return hashlib.sha256(
-        raw.encode("utf-8")
-    ).hexdigest()[:24]
-
-
-def relevant(text: str) -> tuple[bool, list[str]]:
-    normalized = normalize(text)
-
-    blocked = [
-        term
-        for term in BLOCK_TERMS
-        if normalize(term) in normalized
-    ]
-
-    if blocked:
-        return False, []
-
-    matched = [
-        term
-        for term in ALLOW_TERMS
-        if normalize(term) in normalized
-    ]
-
-    return bool(matched), matched[:6]
-
-
-def safe_date(value: object) -> str:
-    value = clean(value)
-
-    if not value:
-        return ""
-
-    return value[:120]
-
-
-def load_seen() -> set[str]:
-    try:
-        data = json.loads(
-            STATE_FILE.read_text(encoding="utf-8")
-        )
-    except FileNotFoundError:
-        return set()
-
-    except Exception as exc:
-        raise RuntimeError(
-            f"Could not parse seen_urls.json: {exc}"
-        )
-
-    if not isinstance(data, dict):
-        raise RuntimeError(
-            "seen_urls.json must contain an object"
-        )
-
-    seen = data.get("seen", [])
-
-    if not isinstance(seen, list):
-        raise RuntimeError(
-            "seen_urls.json 'seen' must be an array"
-        )
-
-    return {
-        str(item)
-        for item in seen
-        if item
-    }
-
-
-def get(url: str) -> requests.Response:
-    response = requests.get(
-        url,
-        headers={
-            "User-Agent": USER_AGENT,
-            "Accept": (
-                "text/html,application/xhtml+xml,"
-                "application/xml;q=0.9,*/*;q=0.8"
-            ),
-        },
-        timeout=TIMEOUT,
-        allow_redirects=True,
-    )
-
-    response.raise_for_status()
-    return response
-
-
-def candidate(
-    *,
-    title: str,
-    url: str,
-    source: str,
-    published: str = "",
-    snippet: str = "",
-    via: str,
-) -> dict | None:
-
-    title = clean(title)
-    url = clean(url)
-    source = clean(source)
-    snippet = clean(snippet)
-
-    if len(title) < 8:
-        return None
-
-    if not url.startswith(("http://", "https://")):
-        return None
-
-    combined = title
-
-    ok, matched = relevant(combined)
-
-    if not ok:
-        return None
-
-    item_id = fingerprint(
-        title,
-        source,
-        url,
-    )
-
-    return {
-        "id": item_id,
-        "title": title,
-        "url": url,
-        "source": source,
-        "published": safe_date(published),
-        "matched": matched,
-        "via": via,
-    }
-
-
-# ------------------------------------------------------------
-# DIRECT OFFICIAL HTML
-# ------------------------------------------------------------
 
 DATE_RE = re.compile(
     r"\b("
@@ -309,189 +205,265 @@ DATE_RE = re.compile(
 )
 
 
-def extract_direct(source: dict) -> list[dict]:
-    response = get(source["url"])
+def clean(value):
+    value = html.unescape(str(value or ""))
+    return re.sub(r"\s+", " ", value).strip()
 
-    soup = BeautifulSoup(
-        response.text,
-        "html.parser",
+
+def norm(value):
+    value = clean(value).lower()
+    value = re.sub(r"[^a-z0-9\u0900-\u097f]+", " ", value)
+    return re.sub(r"\s+", " ", value).strip()
+
+
+def contains(text, terms):
+    n = norm(text)
+    return [term for term in terms if norm(term) in n]
+
+
+def blocked(text):
+    return bool(contains(text, BLOCK_TERMS))
+
+
+def has_geo(text):
+    return bool(contains(text, GEO_TERMS))
+
+
+def fingerprint(title, source, url):
+    raw = f"{norm(title)}|{norm(source)}|{clean(url)}"
+    return hashlib.sha256(raw.encode()).hexdigest()[:24]
+
+
+def load_seen():
+    if not STATE_FILE.exists():
+        return set()
+
+    data = json.loads(STATE_FILE.read_text())
+
+    if not isinstance(data, dict):
+        raise RuntimeError("seen_urls.json must be an object")
+
+    seen = data.get("seen", [])
+
+    if not isinstance(seen, list):
+        raise RuntimeError("seen_urls.json seen must be an array")
+
+    return {str(x) for x in seen if x}
+
+
+def get(url):
+    r = requests.get(
+        url,
+        timeout=TIMEOUT,
+        allow_redirects=True,
+        headers={
+            "User-Agent": USER_AGENT,
+            "Accept": "text/html,application/xml,*/*"
+        }
+    )
+    r.raise_for_status()
+    return r
+
+
+def rss_date(value):
+    try:
+        dt = parsedate_to_datetime(clean(value))
+        if not dt:
+            return None
+
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+
+        return dt.astimezone(timezone.utc)
+    except Exception:
+        return None
+
+
+def fresh_rss(value):
+    dt = rss_date(value)
+
+    if not dt:
+        return False
+
+    cutoff = datetime.now(timezone.utc) - timedelta(days=MAX_AGE_DAYS)
+    return dt >= cutoff
+
+
+def make_candidate(
+    title,
+    url,
+    source,
+    published="",
+    via="",
+    matched=None
+):
+    title = clean(title)
+    url = clean(url)
+    source = clean(source)
+
+    if len(title) < 8:
+        return None
+
+    if not url.startswith(("http://", "https://")):
+        return None
+
+    return {
+        "id": fingerprint(title, source, url),
+        "title": title,
+        "url": url,
+        "source": source,
+        "published": clean(published)[:120],
+        "matched": matched or [],
+        "via": via,
+    }
+
+
+def extract_direct(source):
+    r = get(source["url"])
+    soup = BeautifulSoup(r.text, "html.parser")
+
+    nodes = list(soup.select(
+        "tr, article, .views-row, .news-item, "
+        ".notice-item, .press-release, .item-list li"
+    ))
+
+    if not nodes:
+        nodes = list(soup.select("a[href]"))
+
+    output = []
+    local_ids = set()
+
+    allowed = (
+        BHATKHANDE_TERMS
+        if source["kind"] == "bhatkhande"
+        else DISTRICT_TERMS
     )
 
-    output: list[dict] = []
-    local_seen: set[str] = set()
-
-    # First preference: table rows.
-    containers = list(soup.select("tr"))
-
-    # Also support common CMS/list layouts.
-    containers.extend(
-        soup.select(
-            "article, "
-            ".views-row, "
-            ".news-item, "
-            ".notice-item, "
-            ".press-release, "
-            ".item-list li"
-        )
-    )
-
-    # Last-resort fallback: useful anchors.
-    if not containers:
-        containers = list(soup.select("a[href]"))
-
-    for container in containers:
-        text = clean(
-            container.get_text(
-                " ",
-                strip=True,
-            )
-        )
+    for node in nodes:
+        text = clean(node.get_text(" ", strip=True))
 
         if len(text) < 8:
             continue
 
-        ok, _ = relevant(text)
-
-        if not ok:
+        if blocked(text):
             continue
 
-        link = container.select_one("a[href]")
+        matched = contains(text, allowed)
+
+        if not matched:
+            continue
+
+        link = node.select_one("a[href]")
 
         if link:
             href = clean(link.get("href"))
             title = clean(link.get_text(" ", strip=True))
-        elif getattr(container, "name", "") == "a":
-            href = clean(container.get("href"))
-            title = clean(container.get_text(" ", strip=True))
+        elif getattr(node, "name", "") == "a":
+            href = clean(node.get("href"))
+            title = clean(node.get_text(" ", strip=True))
         else:
             href = ""
             title = ""
 
         if not title:
-            # Keep title compact rather than using an entire row.
             title = text[:220]
 
-        url = (
-            urljoin(source["url"], href)
-            if href
-            else source["url"]
-        )
+        if blocked(title):
+            continue
 
-        match = DATE_RE.search(text)
-        published = match.group(1) if match else ""
+        title_matches = contains(title, allowed)
 
-        item = candidate(
+        if not title_matches:
+            continue
+
+        url = urljoin(source["url"], href) if href else source["url"]
+
+        date_match = DATE_RE.search(text)
+        published = date_match.group(1) if date_match else ""
+
+        item = make_candidate(
             title=title,
             url=url,
             source=source["name"],
             published=published,
-            snippet=text,
-            via="direct",
+            via="Official source",
+            matched=title_matches[:5],
         )
 
         if not item:
             continue
 
-        if item["id"] in local_seen:
+        if item["id"] in local_ids:
             continue
 
-        local_seen.add(item["id"])
+        local_ids.add(item["id"])
         output.append(item)
 
-        if len(output) >= 20:
+        if len(output) >= 15:
             break
 
     return output
 
 
-# ------------------------------------------------------------
-# GOOGLE NEWS RSS
-# ------------------------------------------------------------
-
-def google_news_url(query: str) -> str:
+def google_news_url(query):
     return (
         "https://news.google.com/rss/search?"
         f"q={quote_plus(query)}"
-        "&hl=en-IN"
-        "&gl=IN"
-        "&ceid=IN:en"
+        "&hl=en-IN&gl=IN&ceid=IN:en"
     )
 
 
-def extract_rss(query: str) -> list[dict]:
-    url = google_news_url(query)
+def extract_rss(query):
+    r = get(google_news_url(query))
+    feed = feedparser.parse(r.content)
 
-    response = get(url)
+    if getattr(feed, "bozo", False) and not getattr(feed, "entries", []):
+        raise RuntimeError(f"RSS parse failed: {query}")
 
-    feed = feedparser.parse(
-        response.content
-    )
+    output = []
 
-    if getattr(feed, "bozo", False):
-        # Some feeds set bozo for harmless encoding issues.
-        # Only fail if there are no usable entries.
-        if not getattr(feed, "entries", []):
-            raise RuntimeError(
-                f"RSS parse failed for query: {query}"
-            )
+    for entry in feed.entries[:40]:
+        title = clean(getattr(entry, "title", ""))
+        url = clean(getattr(entry, "link", ""))
+        published = clean(getattr(entry, "published", ""))
 
-    output: list[dict] = []
+        if not fresh_rss(published):
+            continue
 
-    for entry in feed.entries[:30]:
-        title = clean(
-            getattr(entry, "title", "")
-        )
+        if blocked(title):
+            continue
 
-        link = clean(
-            getattr(entry, "link", "")
-        )
+        if not has_geo(title):
+            continue
 
-        summary = clean(
-            getattr(entry, "summary", "")
-        )
+        matched = contains(title, STRONG_TERMS)
 
-        published = clean(
-            getattr(entry, "published", "")
-        )
+        if not matched:
+            continue
 
         source_name = ""
 
-        source_obj = getattr(
-            entry,
-            "source",
-            None,
-        )
+        source_obj = getattr(entry, "source", None)
 
         if source_obj:
             try:
-                source_name = clean(
-                    source_obj.get(
-                        "title",
-                        ""
-                    )
-                )
+                source_name = clean(source_obj.get("title", ""))
             except Exception:
-                source_name = ""
+                pass
 
         if not source_name:
-            # Google News titles often end with " - Publisher".
             parts = title.rsplit(" - ", 1)
 
             if len(parts) == 2:
-                source_name = clean(parts[1])
+                source_name = clean(parts[-1])
 
-        source_name = (
-            source_name
-            or "Google News"
-        )
-
-        item = candidate(
+        item = make_candidate(
             title=title,
-            url=link,
-            source=source_name,
+            url=url,
+            source=source_name or "Google News",
             published=published,
-            snippet=summary,
             via="Google News RSS",
+            matched=matched[:5],
         )
 
         if item:
@@ -500,15 +472,16 @@ def extract_rss(query: str) -> list[dict]:
     return output
 
 
-# ------------------------------------------------------------
-# MERGE / REPORT
-# ------------------------------------------------------------
+def title_key(title):
+    title = re.sub(r"\s+-\s+[^-]+$", "", title)
+    return norm(title)
 
-def main() -> int:
+
+def main():
     seen = load_seen()
 
-    collected: list[dict] = []
-    failures: list[str] = []
+    collected = []
+    failures = []
 
     for source in DIRECT_SOURCES:
         try:
@@ -517,20 +490,13 @@ def main() -> int:
 
             print(
                 f"{source['name']}: "
-                f"{len(rows)} relevant item(s)"
+                f"{len(rows)} candidate(s)"
             )
 
         except Exception as exc:
-            message = (
-                f"{source['name']}: "
-                f"{type(exc).__name__}: {exc}"
-            )
-
-            failures.append(message)
-            print(
-                f"WARNING: {message}",
-                file=sys.stderr,
-            )
+            msg = f"{source['name']}: {type(exc).__name__}: {exc}"
+            failures.append(msg)
+            print(f"WARNING: {msg}", file=sys.stderr)
 
     for query in RSS_QUERIES:
         try:
@@ -539,60 +505,37 @@ def main() -> int:
 
             print(
                 f"RSS {query}: "
-                f"{len(rows)} relevant item(s)"
+                f"{len(rows)} candidate(s)"
             )
 
         except Exception as exc:
-            message = (
-                f"Google News RSS [{query}]: "
-                f"{type(exc).__name__}: {exc}"
-            )
+            msg = f"Google News RSS [{query}]: {type(exc).__name__}: {exc}"
+            failures.append(msg)
+            print(f"WARNING: {msg}", file=sys.stderr)
 
-            failures.append(message)
-
-            print(
-                f"WARNING: {message}",
-                file=sys.stderr,
-            )
-
-    # Prefer direct official results over RSS duplicates.
     collected.sort(
-        key=lambda x: (
-            0 if x["via"] == "direct" else 1,
-            x["title"].lower(),
+        key=lambda item: (
+            0 if item["via"] == "Official source" else 1,
+            item["title"].lower()
         )
     )
 
-    unique: dict[str, dict] = {}
+    deduped = {}
 
     for item in collected:
-        title_key = normalize(
-            re.sub(
-                r"\s+-\s+[^-]+$",
-                "",
-                item["title"],
-            )
-        )
+        key = title_key(item["title"])
 
-        if not title_key:
-            continue
-
-        if title_key not in unique:
-            unique[title_key] = item
+        if key and key not in deduped:
+            deduped[key] = item
 
     new_items = [
         item
-        for item in unique.values()
+        for item in deduped.values()
         if item["id"] not in seen
     ][:MAX_CANDIDATES]
 
     CANDIDATES_FILE.write_text(
-        json.dumps(
-            new_items,
-            ensure_ascii=False,
-            indent=2,
-        ) + "\n",
-        encoding="utf-8",
+        json.dumps(new_items, indent=2, ensure_ascii=False) + "\n"
     )
 
     next_seen = set(seen)
@@ -600,26 +543,18 @@ def main() -> int:
     for item in new_items:
         next_seen.add(item["id"])
 
-    # Prevent unbounded growth while retaining ample history.
-    next_seen_sorted = sorted(next_seen)
-
-    if len(next_seen_sorted) > 3000:
-        next_seen_sorted = next_seen_sorted[-3000:]
+    if len(next_seen) > 3000:
+        next_seen = set(sorted(next_seen)[-3000:])
 
     NEXT_STATE_FILE.write_text(
         json.dumps(
-            {
-                "seen": next_seen_sorted
-            },
-            ensure_ascii=False,
+            {"seen": sorted(next_seen)},
             indent=2,
-        ) + "\n",
-        encoding="utf-8",
+            ensure_ascii=False
+        ) + "\n"
     )
 
-    today = datetime.now(
-        timezone.utc
-    ).strftime("%Y-%m-%d")
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
     lines = [
         "# City updates review",
@@ -629,91 +564,51 @@ def main() -> int:
     ]
 
     if new_items:
-        lines.extend([
-            "## New candidates",
-            "",
-        ])
+        lines += ["## New candidates", ""]
 
         for item in new_items:
-            lines.append(
-                f"- [ ] **{item['title']}**"
-            )
-
-            lines.append(
-                f"  - Source: {item['source']}"
-            )
+            lines.append(f"- [ ] **{item['title']}**")
+            lines.append(f"  - Source: {item['source']}")
 
             if item["published"]:
-                lines.append(
-                    f"  - Date: {item['published']}"
-                )
+                lines.append(f"  - Date: {item['published']}")
 
-            lines.append(
-                f"  - Found via: {item['via']}"
-            )
+            lines.append(f"  - Found via: {item['via']}")
 
             if item["matched"]:
                 lines.append(
-                    "  - Matched: "
-                    + ", ".join(item["matched"])
+                    "  - Matched: " + ", ".join(item["matched"])
                 )
 
-            lines.append(
-                f"  - {item['url']}"
-            )
-
+            lines.append(f"  - {item['url']}")
             lines.append("")
-
     else:
-        lines.extend([
-            "No new candidates.",
-            "",
-        ])
+        lines += ["No new candidates.", ""]
 
     if failures:
-        lines.extend([
-            "## Fetch problems",
-            "",
-        ])
+        lines += ["## Fetch problems", ""]
 
         for failure in failures:
-            lines.append(
-                f"- `{failure}`"
-            )
+            lines.append(f"- `{failure}`")
 
         lines.append("")
 
-    REVIEW_FILE.write_text(
-        "\n".join(lines).rstrip()
-        + "\n",
-        encoding="utf-8",
-    )
+    REVIEW_FILE.write_text("\n".join(lines).rstrip() + "\n")
 
-    create_issue = (
-        bool(new_items)
-        or bool(failures)
-    )
+    create_issue = bool(new_items) or bool(failures)
 
     RESULT_FILE.write_text(
         "\n".join([
             f"create_issue={'1' if create_issue else '0'}",
             f"candidate_count={len(new_items)}",
             f"failure_count={len(failures)}",
-        ]) + "\n",
-        encoding="utf-8",
+        ]) + "\n"
     )
 
     print()
-    print(
-        f"New candidates: {len(new_items)}"
-    )
-
-    print(
-        f"Fetch problems: {len(failures)}"
-    )
-
-    return 0
+    print(f"New candidates: {len(new_items)}")
+    print(f"Fetch problems: {len(failures)}")
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    main()
