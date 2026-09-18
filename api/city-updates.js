@@ -1,16 +1,40 @@
-const QUERIES = [
+const NEWS_QUERIES = [
   '"Lucknow" "heritage walk"',
-  '"Lucknow" exhibition',
-  '"Lucknow" "book festival"',
+  '"Lucknow" exhibition museum',
   '"Lucknow" cultural festival',
-  '"Lucknow" museum exhibition',
+  '"Lucknow" book festival',
   '"Lucknow" monument closure',
+  '"Lucknow" monument restoration',
   '"Lucknow" traffic diversion',
+  '"Lucknow" visitor timing monument',
+  '"State Museum Lucknow"',
+  '"Bhatkhande" Lucknow event',
+  '"Sanatkada" Lucknow',
+  '"Tornos" Lucknow heritage',
+  '"UP Tourism" Lucknow event',
+  '"INTACH" Lucknow heritage',
   '"Rumi Darwaza" Lucknow',
   '"Bara Imambara" Lucknow',
-  '"British Residency" Lucknow',
-  '"State Museum Lucknow"',
-  '"Sanatkada" Lucknow'
+  '"Chota Imambara" Lucknow',
+  '"British Residency" Lucknow'
+];
+
+const DIRECT_SOURCES = [
+  {
+    name: "Lucknow District Administration",
+    url: "https://lucknow.nic.in/past-notices/notices/",
+    mode: "district"
+  },
+  {
+    name: "Bhatkhande Sanskriti Vishwavidyalaya",
+    url: "https://www.bhatkhandeuniversity.ac.in/en/feature/notices-announcements",
+    mode: "bhatkhande"
+  },
+  {
+    name: "Bhatkhande Sanskriti Vishwavidyalaya",
+    url: "https://www.bhatkhandeuniversity.ac.in/en/pressrelease",
+    mode: "bhatkhande"
+  }
 ];
 
 const ALLOW = [
@@ -23,12 +47,21 @@ const ALLOW = [
   "closure",
   "closed",
   "restoration",
+  "renovation",
   "conservation",
+  "restricted access",
   "traffic diversion",
   "route diversion",
-  "cultural",
+  "route diverted",
+  "timing change",
+  "cultural programme",
+  "cultural program",
+  "concert",
+  "theatre",
+  "samaroh",
+  "book fair",
   "book festival",
-  "sanatkada"
+  "heritage"
 ];
 
 const BLOCK = [
@@ -39,23 +72,41 @@ const BLOCK = [
   "vacancy",
   "job fair",
   "rojgar",
+  "appointment",
+  "admission",
+  "counselling",
+  "examination",
+  "exam",
+  "result",
+  "hostel",
+  "semester",
+  "tender",
+  "quotation",
   "election",
+  "political",
   "murder",
-  "arrest",
   "crime",
+  "arrest",
+  "robbery",
   "brunch",
   "staycation",
-  "restaurant",
+  "restaurant offer",
   "hotel offer",
   "raksha bandhan",
   "rakhi",
   "sports meet",
+  "sports competition",
   "tournament"
 ];
 
 const GEO = [
   "lucknow",
   "gomti",
+  "hazratganj",
+  "aminabad",
+  "chowk",
+  "kaiserbagh",
+  "qaiserbagh",
   "rumi darwaza",
   "bara imambara",
   "bada imambara",
@@ -63,58 +114,75 @@ const GEO = [
   "chhota imambara",
   "british residency",
   "lucknow residency",
-  "state museum"
+  "state museum",
+  "bhatkhande",
+  "sanatkada"
 ];
 
-function decodeXML(s = "") {
+function decode(s=""){
   return s
     .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1")
     .replace(/&amp;/g, "&")
     .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/&apos;/g, "'")
+    .replace(/&#39;|&apos;/g, "'")
     .replace(/&lt;/g, "<")
     .replace(/&gt;/g, ">")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/\s+/g, " ")
     .trim();
 }
 
-function field(xml, name) {
-  const m = xml.match(
-    new RegExp(`<${name}(?:\\s[^>]*)?>([\\s\\S]*?)<\\/${name}>`, "i")
+function norm(s=""){
+  return decode(String(s))
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function containsAny(text, arr){
+  const t = norm(text);
+  return arr.some(x => t.includes(norm(x)));
+}
+
+function relevant(title){
+  return (
+    containsAny(title, GEO) &&
+    containsAny(title, ALLOW) &&
+    !containsAny(title, BLOCK)
   );
-  return m ? decodeXML(m[1]) : "";
 }
 
-function cleanTitle(title) {
-  return title.replace(/\s+-\s+[^-]+$/, "").trim();
-}
+function typeFor(title){
+  const t = norm(title);
 
-function typeFor(title) {
-  const t = title.toLowerCase();
+  if(t.includes("heritage walk")) return "heritage_walk";
+  if(t.includes("exhibition")) return "exhibition";
 
-  if (t.includes("heritage walk")) return "heritage_walk";
-  if (t.includes("exhibition")) return "exhibition";
-
-  if (
-    t.includes("closed") ||
+  if(
     t.includes("closure") ||
-    t.includes("diversion")
+    t.includes("closed") ||
+    t.includes("diversion") ||
+    t.includes("restricted access") ||
+    t.includes("timing change")
   ) return "closure";
 
-  if (
+  if(
     t.includes("festival") ||
-    t.includes("mahotsav")
+    t.includes("mahotsav") ||
+    t.includes("samaroh")
   ) return "festival";
 
   return "notice";
 }
 
-function topicKey(title) {
-  const t = title.toLowerCase();
+function topicKey(title){
+  const t = norm(title);
 
   const known = [
     ["gomti book festival", "gomti-book-festival"],
     ["sanatkada", "sanatkada"],
+    ["state museum", "state-museum"],
     ["rumi darwaza", "rumi-darwaza"],
     ["bara imambara", "bara-imambara"],
     ["bada imambara", "bara-imambara"],
@@ -122,133 +190,208 @@ function topicKey(title) {
     ["chhota imambara", "chota-imambara"],
     ["british residency", "british-residency"],
     ["lucknow residency", "british-residency"],
-    ["state museum", "state-museum"]
+    ["bhatkhande", "bhatkhande"]
   ];
 
-  for (const [needle, key] of known) {
-    if (t.includes(needle)) return key;
+  for(const [needle,key] of known){
+    if(t.includes(needle)) return key;
   }
 
   return t
-    .replace(/[^a-z0-9 ]/g, " ")
-    .split(/\s+/)
+    .split(" ")
     .filter(Boolean)
     .filter(w => ![
-      "lucknow","news","the","a","an","in","at","on","for",
-      "of","to","and","with","from","says"
+      "lucknow","news","today","latest","the","a","an",
+      "in","at","on","for","to","of","and","with",
+      "from","says","event"
     ].includes(w))
-    .slice(0, 7)
+    .slice(0,7)
     .join("-");
 }
 
-function relevant(title) {
-  const t = title.toLowerCase();
-
-  if (!GEO.some(x => t.includes(x))) return false;
-  if (!ALLOW.some(x => t.includes(x))) return false;
-  if (BLOCK.some(x => t.includes(x))) return false;
-
-  return true;
+function cleanTitle(title){
+  return decode(title).replace(/\s+-\s+[^-]+$/, "").trim();
 }
 
-function parseRSS(xml) {
-  return [...xml.matchAll(/<item>([\s\S]*?)<\/item>/gi)]
-    .map(m => {
-      const body = m[1];
-
-      return {
-        title: field(body, "title"),
-        url: field(body, "link"),
-        published: field(body, "pubDate"),
-        source: field(body, "source")
-      };
-    });
+function xmlField(xml, name){
+  const m = xml.match(
+    new RegExp(`<${name}(?:\\s[^>]*)?>([\\s\\S]*?)<\\/${name}>`, "i")
+  );
+  return m ? decode(m[1]) : "";
 }
 
-async function fetchQuery(query) {
-  const url =
-    "https://news.google.com/rss/search?q=" +
-    encodeURIComponent(query + " when:7d") +
-    "&hl=en-IN&gl=IN&ceid=IN:en";
+function parseRSS(xml){
+  return [...xml.matchAll(/<item>([\s\S]*?)<\/item>/gi)].map(m => {
+    const body = m[1];
+    return {
+      title: xmlField(body, "title"),
+      url: xmlField(body, "link"),
+      published: xmlField(body, "pubDate"),
+      source: xmlField(body, "source")
+    };
+  });
+}
 
+async function fetchText(url){
   const r = await fetch(url, {
     headers: {
-      "User-Agent": "LucknowAtlas/1.0"
+      "User-Agent": "LucknowAtlas/1.0",
+      "Accept": "text/html,application/xml,*/*"
     }
   });
 
-  if (!r.ok) {
-    throw new Error(`Google News ${r.status}`);
-  }
-
-  return parseRSS(await r.text());
+  if(!r.ok) throw new Error(`${r.status} ${url}`);
+  return r.text();
 }
 
-export default async function handler(req, res) {
-  try {
-    const settled = await Promise.allSettled(
-      QUERIES.map(fetchQuery)
-    );
+async function newsQuery(query){
+  const url =
+    "https://news.google.com/rss/search?q=" +
+    encodeURIComponent(query + " when:14d") +
+    "&hl=en-IN&gl=IN&ceid=IN:en";
 
-    const now = Date.now();
-    const maxAge = 7 * 24 * 60 * 60 * 1000;
+  return parseRSS(await fetchText(url));
+}
 
-    let articles = [];
+function directCandidates(html, source){
+  const out = [];
+  const anchors = [...html.matchAll(
+    /<a[^>]+href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi
+  )];
 
-    for (const result of settled) {
-      if (result.status === "fulfilled") {
-        articles.push(...result.value);
+  for(const m of anchors){
+    const href = m[1];
+    const title = decode(m[2]);
+
+    if(title.length < 8) continue;
+    if(!containsAny(title, ALLOW)) continue;
+    if(containsAny(title, BLOCK)) continue;
+
+    if(source.mode === "district" && !containsAny(title, [
+      "event","heritage","festival","museum","monument",
+      "closure","traffic","tourism","cultural"
+    ])) continue;
+
+    if(source.mode === "bhatkhande" && !containsAny(title, [
+      "event","festival","concert","cultural","exhibition",
+      "performance","workshop","seminar","samaroh"
+    ])) continue;
+
+    let url;
+
+    try{
+      url = new URL(href, source.url).href;
+    }catch{
+      continue;
+    }
+
+    out.push({
+      title,
+      url,
+      published: "",
+      source: source.name,
+      direct: true
+    });
+  }
+
+  return out.slice(0,20);
+}
+
+async function directSource(source){
+  return directCandidates(await fetchText(source.url), source);
+}
+
+function buildUpdate(article){
+  const title = cleanTitle(article.title);
+  const pub = Date.parse(article.published);
+
+  const start = Number.isFinite(pub)
+    ? new Date(pub)
+    : new Date();
+
+  const end = new Date(
+    start.getTime() + 72 * 60 * 60 * 1000
+  );
+
+  return {
+    id: `auto-${topicKey(title)}`,
+    type: typeFor(title),
+    title,
+    description: "",
+    siteId: "",
+    startDate: start.toISOString(),
+    endDate: end.toISOString(),
+    auto: true,
+    source: {
+      name: article.source || "Source",
+      url: article.url
+    }
+  };
+}
+
+export default async function handler(req, res){
+  try{
+    const jobs = [
+      ...DIRECT_SOURCES.map(source => directSource(source)),
+      ...NEWS_QUERIES.map(query => newsQuery(query))
+    ];
+
+    const settled = await Promise.allSettled(jobs);
+
+    let rows = [];
+
+    for(const result of settled){
+      if(result.status === "fulfilled"){
+        rows.push(...result.value);
       }
     }
 
-    articles = articles.filter(article => {
-      const date = Date.parse(article.published);
+    const now = Date.now();
+    const maxAge = 14 * 24 * 60 * 60 * 1000;
+
+    rows = rows.filter(item => {
+      if(!relevant(item.title)) return false;
+
+      if(item.direct) return true;
+
+      const d = Date.parse(item.published);
 
       return (
-        Number.isFinite(date) &&
-        now - date <= maxAge &&
-        relevant(article.title)
+        Number.isFinite(d) &&
+        now - d <= maxAge
       );
     });
 
-    articles.sort(
-      (a, b) =>
-        Date.parse(b.published) -
-        Date.parse(a.published)
-    );
+    rows.sort((a,b) => {
+      if(a.direct !== b.direct){
+        return a.direct ? -1 : 1;
+      }
 
-    const seen = new Set();
-    const output = [];
-
-    for (const article of articles) {
-      const title = cleanTitle(article.title);
-      const key = topicKey(title);
-
-      if (!key || seen.has(key)) continue;
-      seen.add(key);
-
-      const published = new Date(article.published);
-      const expires = new Date(
-        published.getTime() + 72 * 60 * 60 * 1000
+      return (
+        (Date.parse(b.published) || 0) -
+        (Date.parse(a.published) || 0)
       );
+    });
 
-      output.push({
-        id: `auto-${key}`,
-        type: typeFor(title),
-        title,
-        description: "",
-        siteId: "",
-        startDate: published.toISOString(),
-        endDate: expires.toISOString(),
-        publishedAt: published.toISOString(),
-        auto: true,
-        source: {
-          name: article.source || "News source",
-          url: article.url
-        }
-      });
+    const seenTopics = new Set();
+    const output = [];
+    const typeCounts = {};
 
-      if (output.length >= 6) break;
+    for(const row of rows){
+      const key = topicKey(row.title);
+
+      if(!key || seenTopics.has(key)) continue;
+
+      const type = typeFor(row.title);
+
+      if((typeCounts[type] || 0) >= 2) continue;
+
+      seenTopics.add(key);
+      typeCounts[type] = (typeCounts[type] || 0) + 1;
+
+      output.push(buildUpdate(row));
+
+      if(output.length >= 6) break;
     }
 
     res.setHeader(
@@ -258,7 +401,7 @@ export default async function handler(req, res) {
 
     res.status(200).json(output);
 
-  } catch (error) {
+  }catch(error){
     console.error(error);
     res.status(200).json([]);
   }
