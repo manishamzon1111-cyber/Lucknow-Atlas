@@ -117,6 +117,22 @@
   border-bottom:0;
 }
 
+.city-update-card::after{
+  content:"";
+  display:block;
+  clear:both;
+}
+
+.city-update-thumb{
+  float:right;
+  width:88px;
+  height:64px;
+  margin:0 0 8px 12px;
+  border-radius:8px;
+  object-fit:cover;
+  background:#eef1f1;
+}
+
 .city-update-meta{
   display:flex;
   align-items:flex-start;
@@ -258,6 +274,12 @@
 
   .city-update-card{
     padding:15px 0 16px;
+  }
+
+  .city-update-thumb{
+    width:92px;
+    height:68px;
+    margin-left:12px;
   }
 
   .city-update-meta{

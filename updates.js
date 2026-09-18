@@ -147,6 +147,7 @@
 
     list.innerHTML = updates.map(item => {
       const url = safeUrl(item.source.url);
+      const imageUrl = safeUrl(item.imageUrl);
       const desc = String(item.description || "").trim();
 
       return `
@@ -160,6 +161,18 @@
               ${esc(formatRange(item))}
             </span>
           </div>
+
+          ${
+            imageUrl
+              ? `<img
+                   class="city-update-thumb"
+                   src="${esc(imageUrl)}"
+                   alt=""
+                   loading="lazy"
+                   decoding="async"
+                 >`
+              : ""
+          }
 
           <h3>${esc(item.title)}</h3>
 

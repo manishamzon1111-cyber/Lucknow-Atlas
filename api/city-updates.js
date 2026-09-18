@@ -25,6 +25,7 @@ function toFrontend(item) {
     type: TYPE_MAP[item.type] || "notice",
     title: item.title,
     description: item.description || "",
+    imageUrl: item.imageUrl || null,
     siteId: "",
     startDate,
     endDate,
