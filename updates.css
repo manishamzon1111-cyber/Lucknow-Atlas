@@ -292,3 +292,68 @@
     text-align:left;
   }
 }
+
+/* On this day */
+.city-on-this-day{
+  margin:4px 18px 8px;
+  padding:12px;
+  border:1px solid #e1e5e5;
+  border-radius:11px;
+  background:#f8f8f6;
+}
+
+.city-on-this-day-label{
+  margin-bottom:9px;
+  color:#806b47;
+  font-size:9.5px;
+  font-weight:800;
+  letter-spacing:.7px;
+  text-transform:uppercase;
+}
+
+.city-on-this-day-row{
+  display:flex;
+  gap:11px;
+  align-items:flex-start;
+}
+
+.city-on-this-day-thumb{
+  width:72px;
+  height:54px;
+  flex:0 0 72px;
+  border-radius:7px;
+  object-fit:cover;
+  background:#eef1f1;
+}
+
+.city-on-this-day strong{
+  display:block;
+  color:#283438;
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:13px;
+  line-height:1.3;
+}
+
+.city-on-this-day p{
+  margin:4px 0 6px;
+  color:#697579;
+  font-size:11px;
+  line-height:1.4;
+}
+
+.city-on-this-day a{
+  color:#6c5432;
+  font-size:10px;
+  font-weight:700;
+  text-decoration:none;
+}
+
+.city-on-this-day a:hover{
+  text-decoration:underline;
+}
+
+@media (max-width:900px){
+  .city-on-this-day{
+    margin:4px 18px 8px;
+  }
+}

@@ -3,6 +3,7 @@
 
   const LIMIT = 6;
   const REFRESH_MS = 60 * 1000;
+  const FALLBACK_THUMB = "./img/update-fallback.svg";
 
   const TYPE_LABELS = {
     heritage_walk: "Heritage walk",
@@ -13,6 +14,7 @@
   };
 
   let updates = [];
+  let onThisDay = null;
 
   function esc(value){
     return String(value ?? "").replace(/[&<>"']/g, ch => ({
@@ -70,7 +72,7 @@
 
     if(!start || !end) return "";
 
-    if(item.auto){
+    if(item.auto && item.publishedAt){
       return `Published ${dateOnly(start)}, ${timeOnly(start)}`;
     }
 
@@ -147,7 +149,9 @@
 
     list.innerHTML = updates.map(item => {
       const url = safeUrl(item.source.url);
-      const imageUrl = safeUrl(item.imageUrl);
+      const imageUrl =
+        safeUrl(item.imageUrl) ||
+        FALLBACK_THUMB;
       const desc = String(item.description || "").trim();
 
       return `
@@ -162,17 +166,14 @@
             </span>
           </div>
 
-          ${
-            imageUrl
-              ? `<img
-                   class="city-update-thumb"
-                   src="${esc(imageUrl)}"
-                   alt=""
-                   loading="lazy"
-                   decoding="async"
-                 >`
-              : ""
-          }
+          <img
+            class="city-update-thumb"
+            src="${esc(imageUrl)}"
+            alt=""
+            loading="lazy"
+            decoding="async"
+            referrerpolicy="no-referrer"
+          >
 
           <h3>${esc(item.title)}</h3>
 
@@ -198,6 +199,77 @@
         </article>
       `;
     }).join("");
+
+    list
+      .querySelectorAll(".city-update-thumb")
+      .forEach(img => {
+        img.addEventListener("error", () => {
+          if(img.dataset.fallback === "1") return;
+          img.dataset.fallback = "1";
+          img.src = FALLBACK_THUMB;
+        });
+      });
+
+    renderOnThisDay();
+  }
+
+  function todayKey(){
+    const parts =
+      new Intl.DateTimeFormat("en-US", {
+        timeZone:"Asia/Kolkata",
+        month:"2-digit",
+        day:"2-digit"
+      }).formatToParts(new Date());
+
+    const month =
+      parts.find(part => part.type === "month")?.value;
+
+    const day =
+      parts.find(part => part.type === "day")?.value;
+
+    return `${month}-${day}`;
+  }
+
+  function renderOnThisDay(){
+    const box =
+      document.getElementById("cityOnThisDay");
+
+    if(!box) return;
+
+    if(!onThisDay){
+      box.classList.add("hidden");
+      box.innerHTML = "";
+      return;
+    }
+
+    const url =
+      safeUrl(onThisDay.source?.url);
+
+    box.innerHTML = `
+      <div class="city-on-this-day-label">On this day · ${esc(onThisDay.year)}</div>
+      <div class="city-on-this-day-row">
+        <img
+          src="${FALLBACK_THUMB}"
+          alt=""
+          class="city-on-this-day-thumb"
+        >
+        <div>
+          <strong>${esc(onThisDay.title)}</strong>
+          ${
+            onThisDay.description
+              ? `<p>${esc(onThisDay.description)}</p>`
+              : ""
+          }
+          ${
+            url
+              ? `<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${esc(onThisDay.source?.name || "Source")} ↗</a>`
+              : ""
+          }
+        </div>
+      </div>
+    `;
+
+    box.classList.remove("hidden");
   }
 
   function openDrawer(){
@@ -255,13 +327,21 @@
 
   async function load(){
     try{
-      const [manualResult, autoResult] = await Promise.allSettled([
+      const [
+        manualResult,
+        autoResult,
+        historyResult
+      ] = await Promise.allSettled([
         fetch("./updates.json", {cache:"no-store"}).then(r => {
           if(!r.ok) throw new Error(`updates.json returned ${r.status}`);
           return r.json();
         }),
         fetch("/api/city-updates").then(r => {
           if(!r.ok) throw new Error(`city updates API returned ${r.status}`);
+          return r.json();
+        }),
+        fetch("./on-this-day.json", {cache:"no-store"}).then(r => {
+          if(!r.ok) throw new Error(`on-this-day.json returned ${r.status}`);
           return r.json();
         })
       ]);
@@ -277,6 +357,17 @@
         Array.isArray(autoResult.value)
           ? autoResult.value
           : [];
+
+      const history =
+        historyResult.status === "fulfilled" &&
+        Array.isArray(historyResult.value)
+          ? historyResult.value
+          : [];
+
+      onThisDay =
+        history.find(item =>
+          item?.date === todayKey()
+        ) || null;
 
       const merged = [];
       const ids = new Set();
@@ -295,6 +386,7 @@
     }
 
     renderButtons();
+    renderOnThisDay();
 
     if(
       document

@@ -1,0 +1,86 @@
+[
+  {
+    "date":"02-11",
+    "year":1856,
+    "title":"Awadh was annexed by the East India Company",
+    "description":"The annexation ended the reign of Wajid Ali Shah, the last King of Awadh.",
+    "source":{"name":"Wajid Ali Shah","url":"https://en.wikipedia.org/wiki/Wajid_Ali_Shah"}
+  },
+  {
+    "date":"05-30",
+    "year":1857,
+    "title":"The 1857 uprising reached Lucknow",
+    "description":"Mutiny broke out in Lucknow as the wider uprising spread across north India.",
+    "source":{"name":"1857 timeline","url":"https://en.wikipedia.org/wiki/Timeline_of_the_Indian_Rebellion_of_1857"}
+  },
+  {
+    "date":"06-30",
+    "year":1857,
+    "title":"The Battle of Chinhat was fought near Lucknow",
+    "description":"Rebel forces defeated the East India Company force near Chinhat and Ismailganj.",
+    "source":{"name":"Battle of Chinhat","url":"https://en.wikipedia.org/wiki/Battle_of_Chinhat"}
+  },
+  {
+    "date":"07-01",
+    "year":1857,
+    "title":"The siege of the Lucknow Residency began",
+    "description":"The Residency became the centre of a prolonged siege during the uprising of 1857.",
+    "source":{"name":"The Residency, Lucknow","url":"https://en.wikipedia.org/wiki/The_Residency,_Lucknow"}
+  },
+  {
+    "date":"07-30",
+    "year":1822,
+    "title":"Wajid Ali Shah was born in Lucknow",
+    "description":"The future last King of Awadh was born in Lucknow.",
+    "source":{"name":"Wajid Ali Shah","url":"https://en.wikipedia.org/wiki/Wajid_Ali_Shah"}
+  },
+  {
+    "date":"09-18",
+    "year":1857,
+    "title":"The first relief force resumed its advance toward Lucknow",
+    "description":"Henry Havelock's force resumed its advance toward the besieged Residency.",
+    "source":{"name":"Siege of Lucknow","url":"https://en.wikipedia.org/wiki/Siege_of_Lucknow"}
+  },
+  {
+    "date":"09-19",
+    "year":1857,
+    "title":"Havelock and Outram marched toward Lucknow",
+    "description":"The relief force continued its advance toward the besieged Residency.",
+    "source":{"name":"1857 timeline","url":"https://en.wikipedia.org/wiki/Timeline_of_the_Indian_Rebellion_of_1857"}
+  },
+  {
+    "date":"09-23",
+    "year":1857,
+    "title":"The relief force reached Alambagh",
+    "description":"Havelock's force drove rebel forces from Alambagh during its advance on Lucknow.",
+    "source":{"name":"Siege of Lucknow","url":"https://en.wikipedia.org/wiki/Siege_of_Lucknow"}
+  },
+  {
+    "date":"09-25",
+    "year":1857,
+    "title":"The first relief of Lucknow reached the Residency",
+    "description":"Havelock and Outram's force fought through the city and reached the Residency.",
+    "source":{"name":"Siege of Lucknow","url":"https://en.wikipedia.org/wiki/Siege_of_Lucknow"}
+  },
+  {
+    "date":"11-17",
+    "year":1857,
+    "title":"The second relief of Lucknow reached the Residency",
+    "description":"Colin Campbell's relief operation enabled the evacuation of the Residency.",
+    "source":{"name":"Siege of Lucknow","url":"https://en.wikipedia.org/wiki/Siege_of_Lucknow"}
+  },
+  {
+    "date":"11-19",
+    "year":1857,
+    "title":"Women and children were evacuated from Lucknow",
+    "description":"Civilians were evacuated following the second relief of the Residency.",
+    "source":{"name":"1857 timeline","url":"https://en.wikipedia.org/wiki/Timeline_of_the_Indian_Rebellion_of_1857"}
+  },
+  {
+    "date":"11-22",
+    "year":1857,
+    "title":"British forces withdrew from the Lucknow Residency",
+    "description":"The Residency was abandoned after the evacuation.",
+    "source":{"name":"1857 timeline","url":"https://en.wikipedia.org/wiki/Timeline_of_the_Indian_Rebellion_of_1857"}
+  }
+]
