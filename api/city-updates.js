@@ -127,6 +127,9 @@ function decode(s=""){
     .replace(/&#39;|&apos;/g, "'")
     .replace(/&lt;/g, "<")
     .replace(/&gt;/g, ">")
+    .replace(/&ndash;/g, "–")
+    .replace(/&mdash;/g, "—")
+    .replace(/&nbsp;/g, " ")
     .replace(/<[^>]+>/g, " ")
     .replace(/\s+/g, " ")
     .trim();
@@ -255,6 +258,8 @@ async function newsQuery(query){
 
 function directCandidates(html, source){
   const out = [];
+  const currentYear = new Date().getFullYear();
+
   const anchors = [...html.matchAll(
     /<a[^>]+href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi
   )];
@@ -264,6 +269,12 @@ function directCandidates(html, source){
     const title = decode(m[2]);
 
     if(title.length < 8) continue;
+
+    // Never turn an obviously old official notice into a "current" update.
+    const years = [...title.matchAll(/\b(20\d{2})\b/g)]
+      .map(x => Number(x[1]));
+
+    if(years.length && Math.max(...years) < currentYear) continue;
     if(!containsAny(title, ALLOW)) continue;
     if(containsAny(title, BLOCK)) continue;
 
@@ -389,7 +400,12 @@ export default async function handler(req, res){
       seenTopics.add(key);
       typeCounts[type] = (typeCounts[type] || 0) + 1;
 
-      output.push(buildUpdate(row));
+      const update = buildUpdate(row);
+
+      // API must never return already-expired generated updates.
+      if(Date.parse(update.endDate) <= Date.now()) continue;
+
+      output.push(update);
 
       if(output.length >= 6) break;
     }
