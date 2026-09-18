@@ -1,1 +1,16 @@
-[]
+[
+  {
+    "id": "gomti-book-festival-2026",
+    "type": "festival",
+    "title": "Gomti Book Festival",
+    "description": "Nine-day book festival in Lucknow.",
+    "siteId": "",
+    "startDate": "2026-09-12T00:00:00+05:30",
+    "endDate": "2026-09-20T23:59:59+05:30",
+    "source": {
+      "name": "ThePrint",
+      "url": "https://news.google.com/rss/articles/CBMimAFBVV95cUxPWDQzWTBRdnBSNVRmalpLc2l2ZjZsbms5SWF3Y0EyUDJzakxIeFEyNEFOSjhyLUJIQkdxMDZER1ZKTmpFeFhwRHdaQ1pidVpuVnNDcVNfNGw5Q1Y2SjA5NDh0ZmtCbFFXRlFscjNYalJDQWJ0bE5XZ2I5UnViZjhraG9ZSVZTWmR6ZW1fWTZjWVVKWi1PTHdNV9IBngFBVV95cUxQRU1sbThWcGYwM0Y5RzJpNmRmdHNibFpYbVZJR1FrU3lZMG90U0dlMGJqOW5hQWZ2b1JtQVBvZ0VXa0dKTnpKckU2aFJ1Rnk5ZUFPYzlJdTRGbG05MnNxQkFHLUhJQ3hVOW4tLVdZLU9wbXdjc3V5c3RzMEh2eS1wZFl1Z1Z4YktLdENPcGFNdGZUdzVaXzJlQ21zMGFLUQ?oc=5"
+    },
+    "addedOn": "2026-09-18"
+  }
+]
