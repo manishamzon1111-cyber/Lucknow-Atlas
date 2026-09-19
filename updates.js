@@ -340,7 +340,10 @@
           if(!r.ok) throw new Error(`city updates API returned ${r.status}`);
           return r.json();
         }),
-        fetch("./on-this-day.json", {cache:"no-store"}).then(r => {
+        fetch(
+          `./on-this-day.json?d=${encodeURIComponent(todayKey())}`,
+          {cache:"no-store"}
+        ).then(r => {
           if(!r.ok) throw new Error(`on-this-day.json returned ${r.status}`);
           return r.json();
         })
