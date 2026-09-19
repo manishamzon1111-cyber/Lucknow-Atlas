@@ -2,7 +2,7 @@ import { getSnapshot } from "../lib/city-updates/store.js";
 import { refreshCityUpdates } from "../lib/city-updates/refresh.js";
 import { expiryDate, addDays } from "../lib/city-updates/utils.js";
 
-const STALE_MS = 6 * 60 * 60 * 1000; // refresh if snapshot older than 6 hours
+const STALE_MS = 5 * 60 * 60 * 1000; // refresh if snapshot older than 5 hours
 
 const TYPE_MAP = {
   heritage_walk: "heritage_walk",
@@ -72,8 +72,11 @@ export default async function handler(req, res) {
     const items = Array.isArray(snapshot?.items)
       ? snapshot.items.map(toFrontend).filter(Boolean)
       : [];
-    res.setHeader("Cache-Control", "public, s-maxage=900, stale-while-revalidate=21600");
+    res.setHeader("Cache-Control", "no-store, max-age=0");
     res.setHeader("X-City-Updates-Version", "2");
+    if (snapshot?.generatedAt) {
+      res.setHeader("X-City-Updates-Generated-At", snapshot.generatedAt);
+    }
     return res.status(200).json(items);
   } catch (error) {
     console.error(error);
